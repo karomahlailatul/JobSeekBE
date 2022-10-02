@@ -130,10 +130,10 @@ const UserController = {
 
           // Delete From Drive
           if (user.picture != null || user.picture != undefined) {
-            const urlParamsDrive = new URLSearchParams(user.picture);
-            const fileIdDrive = urlParamsDrive.get("id") == (null || undefined) ? urlParamsDrive.get("https://drive.google.com/thumbnail?id") : urlParamsDrive.get("id");
-
-            await deleteFromGoogleDrive(fileIdDrive, auth);
+            // const urlParamsDrive = new URLSearchParams(user.picture);
+            // const fileIdDrive = urlParamsDrive.get("id") == (null || undefined) ? urlParamsDrive.get("https://drive.google.com/thumbnail?id") : urlParamsDrive.get("id");
+            
+            await deleteFromGoogleDrive(user.picture, auth);
             // console.log(fileIdDrive);
           }
 
