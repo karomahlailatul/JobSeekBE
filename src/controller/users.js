@@ -129,7 +129,7 @@ const UserController = {
           const auth = authenticateGoogle();
 
           if (user.picture != null || user.picture != undefined) {
-              
+            
             await deleteFromGoogleDrive(user.picture, auth);
             
           }
