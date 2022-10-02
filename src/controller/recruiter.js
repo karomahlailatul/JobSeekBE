@@ -1,13 +1,13 @@
 // const { v4: uuidv4 } = require("uuid");
-const recuiterModel = require("../models/recuiter");
+const recruiterModel = require("../models/recruiter");
 const createError = require("http-errors");
 const commonHelper = require("../helper/common");
 // const client = require('../config/redis')
 
 const { authenticateGoogle, uploadToGoogleDrive } = require("../middlewares/googleDriveService");
 
-const recuiterController = {
-  getPaginationRecuiter: async (req, res) => {
+const recruiterController = {
+  getPaginationRecruiter: async (req, res) => {
     try {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
@@ -19,15 +19,15 @@ const recuiterController = {
 
       if (search === null || search === undefined) {
         querysearch = ``;
-        totalData = parseInt((await recuiterModel.selectAll()).rowCount);
+        totalData = parseInt((await recruiterModel.selectAll()).rowCount);
       } else {
-        querysearch = `inner join users on recuiter.users_id = users.id where users.name ilike '%${search}%' `;
-        totalData = parseInt((await recuiterModel.selectAllSearch(querysearch)).rowCount);
+        querysearch = `inner join users on recruiter.users_id = users.id where users.name ilike '%${search}%' `;
+        totalData = parseInt((await recruiterModel.selectAllSearch(querysearch)).rowCount);
       }
 
-      const sortby = "recuiter." + ( req.query.sortby || "created_on" );
+      const sortby = "recruiter." + ( req.query.sortby || "created_on" );
       const sort = req.query.sort || "desc";
-      const result = await recuiterModel.selectPagination({
+      const result = await recruiterModel.selectPagination({
         limit,
         offset,
         sortby,
@@ -48,18 +48,18 @@ const recuiterController = {
       res.send(createError(404));
     }
   },
-  getRecuiter: async (req, res) => {
+  getRecruiter: async (req, res) => {
     try {
       const id = req.params.id;
 
-      const checkRecuiter = await recuiterModel.selectRecuiter(id);
+      const checkrecruiter = await recruiterModel.selectRecruiter(id);
       try {
-        if (checkRecuiter.rowCount == 0) throw "Recuiter has not found";
+        if (checkrecruiter.rowCount == 0) throw "Recruiter has not found";
       } catch (error) {
         return commonHelper.response(res, null, 404, error);
       }
 
-      const result = checkRecuiter;
+      const result = checkrecruiter;
 
       // client.setEx(`product/${id}`, 60 * 60, JSON.stringify(result.rows))
       commonHelper.response(res, result.rows, 200, null);
@@ -67,7 +67,7 @@ const recuiterController = {
       res.send(createError(404));
     }
   },
-  insertRecuiter: async (req, res) => {
+  insertRecruiter: async (req, res) => {
     try {
       //  const id = uuidv4().toLocaleLowerCase();
       if (!req.file) {
@@ -79,7 +79,7 @@ const recuiterController = {
 
         const { users_id , position, company , email, address, phone, description } = req.body;
         const id = users_id;
-        const checkUsers = await recuiterModel.selectUsers(users_id);
+        const checkUsers = await recruiterModel.selectUsers(users_id);
 
         try {
           if (checkUsers.rowCount == 0) throw "Users has not found";
@@ -88,22 +88,22 @@ const recuiterController = {
         }
 
       
-        await recuiterModel.insertRecuiter(id, users_id , position, company , email, address, phone, logo , description );
-        commonHelper.response(res, null, 201, "New recuiter Created");
+        await recruiterModel.insertRecruiter(id, users_id , position, company , email, address, phone, logo , description );
+        commonHelper.response(res, null, 201, "New Recruiter Created");
         
       }
     } catch (error) {
       res.send(createError(400));
     }
   },
-  updateRecuiter: async (req, res) => {
+  updateRecruiter: async (req, res) => {
     try {
       const id = req.params.id;
 
-      const checkRecuiter = await recuiterModel.selectRecuiter(id);
+      const checkrecruiter = await recruiterModel.selectRecruiter(id);
 
       try {
-        if (checkRecuiter.rowCount == 0) throw "Recuiter has not found";
+        if (checkrecruiter.rowCount == 0) throw "recruiter has not found";
       } catch (error) {
         return commonHelper.response(res, null, 404, error);
       }
@@ -115,7 +115,7 @@ const recuiterController = {
 
         const { users_id , position, company , email, address, phone, description } = req.body;
 
-        const checkUsers = await recuiterModel.selectUsers(users_id);
+        const checkUsers = await recruiterModel.selectUsers(users_id);
 
         try {
           if (checkUsers.rowCount == 0) throw "Users has not found";
@@ -123,13 +123,13 @@ const recuiterController = {
           return commonHelper.response(res, null, 404, error);
         }
 
-        await recuiterModel.updateRecuiter(id, users_id , position, company , email, address, phone, logo , description);
+        await recruiterModel.updaterecruiter(id, users_id , position, company , email, address, phone, logo , description);
 
-        commonHelper.response(res, null, 201, "Recuiter Update");
+        commonHelper.response(res, null, 201, "Recruiter Update");
       } else {
         const {users_id , position, company , email, address, phone, description} = req.body;
 
-        const checkUsers = await recuiterModel.selectUsers(users_id);
+        const checkUsers = await recruiterModel.selectUsers(users_id);
 
         try {
           if (checkUsers.rowCount == 0) throw "Users has not found";
@@ -137,39 +137,39 @@ const recuiterController = {
           return commonHelper.response(res, null, 404, error);
         }
 
-        await recuiterModel.updateRecuiterNoLogo(id, users_id , position, company , email, address, phone, description);
+        await recruiterModel.updateRecruiterNoLogo(id, users_id , position, company , email, address, phone, description);
 
-        commonHelper.response(res, null, 201, "Recuiter Update");
+        commonHelper.response(res, null, 201, "Recruiter Update");
       }
     } catch (error) {
       res.send(createError(400));
     }
   },
-  deleteRecuiter: async (req, res) => {
+  deleteRecruiter: async (req, res) => {
     try {
       const id = req.params.id;
 
-      const checkrecuiter = await recuiterModel.selectRecuiter(id);
+      const checkrecruiter = await recruiterModel.selectRecruiter(id);
       try {
-        if (checkrecuiter.rowCount == 0) throw "Recuiter has not found";
+        if (checkrecruiter.rowCount == 0) throw "Recruiter has not found";
       } catch (error) {
         return commonHelper.response(res, null, 404, error);
       }
 
-      await recuiterModel.deleteRecuiter(id);
-      commonHelper.response(res, null, 200, "Recuiter Deleted");
+      await recruiterModel.deleteRecruiter(id);
+      commonHelper.response(res, null, 200, "Recruiter Deleted");
     } catch (error) {
       res.send(createError(404));
     }
   },
-  insertRecuiterOnRegister: async (req, res) => {
+  insertRecruiterOnRegister: async (req, res) => {
     try {
         // const id = uuidv4().toLocaleLowerCase();
         const { users_id , position, company } = req.body;
 
         const id = users_id;
        
-        const checkUsers = await recuiterModel.selectUsers(users_id);
+        const checkUsers = await recruiterModel.selectUsers(users_id);
 
         try {
           if (checkUsers.rowCount == 0) throw "Users has not found";
@@ -177,8 +177,8 @@ const recuiterController = {
           return commonHelper.response(res, null, 404, error);
         }
 
-        await recuiterModel.insertRecuiterOnRegister( id, users_id , position, company );
-        commonHelper.response(res, null, 201, "New recuiter Created");
+        await recruiterModel.insertRecruiterOnRegister( id, users_id , position, company );
+        commonHelper.response(res, null, 201, "New Recruiter Created");
         
     } catch (error) {
       res.send(createError(400));
@@ -187,4 +187,4 @@ const recuiterController = {
 
 };
 
-module.exports = recuiterController;
+module.exports = recruiterController;

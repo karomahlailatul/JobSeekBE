@@ -6,7 +6,7 @@ const skillRouter = require("./skill")
 const workExperienceRouter = require("./workExperience")
 const portfolioRouter = require("./portfolio")
 const skillUsersRouter = require("./skillUsers")
-const recuiterRouter = require("./recuiter")
+const recruiterRouter = require("./recruiter")
 const jobRouter = require("./job")
 const jobApplyRouter = require("./jobApply")
 
@@ -17,7 +17,7 @@ router
     .use("/work-experience", workExperienceRouter)
     .use("/portfolio", portfolioRouter)
     .use("/skill-users", skillUsersRouter)
-    .use("/recuiter", recuiterRouter)
+    .use("/recruiter", recruiterRouter)
     .use("/job", jobRouter)
     .use("/job-apply", jobApplyRouter)
 

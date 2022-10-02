@@ -42,14 +42,17 @@ const uploadToGoogleDrive = async (file, auth) => {
     return response;
 };
 
-// const deleteFile = (filePath) => {
-//     fs.unlink(filePath, () => {
-//         console.log("file deleted");
-//     });
-// };
+const deleteFromGoogleDrive = async (fileId, auth) => {
+    const driveService = google.drive({ version: "v3", auth });
+    const response = await driveService.files.delete({
+        fileId: fileId,
+    });
+    return response;
+};
 
 module.exports = {
     authenticateGoogle,
     uploadToGoogleDrive,
+    deleteFromGoogleDrive
     // deleteFile
 }

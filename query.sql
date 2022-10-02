@@ -22,12 +22,13 @@ domicile 		text 	,
 location 		text 	,
 description     text 	,
  
-role 			text 	not null ,
+role 			text not null ,
+verify          text not null ,
 
 created_on 		timestamp default CURRENT_TIMESTAMP not null	,
 updated_on 		timestamp default CURRENT_TIMESTAMP not null	,
 
-check 	        (role       in ('user', 'recuiter', 'admin')),
+check 	        (role       in ('user', 'recruiter', 'admin')),
 
 primary key (id) 
 );
@@ -55,6 +56,14 @@ EXECUTE PROCEDURE update_updated_on_users();
 
 
 
+create table users_verification (
+    id text not null ,
+    users_id text ,
+    token text ,
+    created_on timestamp default CURRENT_TIMESTAMP not null	,
+    constraint 	users foreign key(users_id) 	references 	users(id) ON DELETE CASCADE,
+primary key (id)
+)
 
 
 
@@ -67,7 +76,7 @@ ended date ,
 description text ,
 users_id 		text	,
 created_on timestamp default CURRENT_TIMESTAMP not null	,
-constraint 	users foreign key(users_id) 	references 	users(id),
+constraint 	users foreign key(users_id) 	references 	users(id) ON DELETE CASCADE,
 primary key (id) 
 );
 
@@ -81,7 +90,7 @@ photo text ,
 description  text,
 users_id 		text	,
 created_on timestamp default CURRENT_TIMESTAMP not null	,
-constraint 	users foreign key(users_id) 	references 	users(id),
+constraint 	users foreign key(users_id) 	references 	users(id) ON DELETE CASCADE,
 primary key (id) 
 );
 
@@ -92,8 +101,8 @@ id text not null ,
 skill_id 		text	,
 users_id 		text	,
 created_on timestamp default CURRENT_TIMESTAMP not null	,
-constraint 	skill foreign key(skill_id) 	references 	skill(id),
-constraint 	users foreign key(users_id) 	references 	users(id),
+constraint 	skill foreign key(skill_id) 	references 	skill(id) ON DELETE CASCADE,
+constraint 	users foreign key(users_id) 	references 	users(id) ON DELETE CASCADE,
 primary key (id) 
 );
 
@@ -106,7 +115,7 @@ primary key (id)
 
 
 
-create table recuiter(
+create table recruiter(
 id text not null,
 
 users_id 		text	,
@@ -122,7 +131,7 @@ description text ,
 created_on timestamp default CURRENT_TIMESTAMP not null,
 updated_on timestamp default CURRENT_TIMESTAMP not null,
 
-constraint 	users foreign key(users_id) 	references 	users(id),
+constraint 	users foreign key(users_id) references 	users(id) ON DELETE CASCADE,
 
 primary key (id) 
 );
@@ -130,7 +139,7 @@ primary key (id)
 
 
 
-CREATE  FUNCTION update_updated_on_recuiter()
+CREATE  FUNCTION update_updated_on_recruiter()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_on = now();
@@ -140,12 +149,12 @@ $$ language 'plpgsql';
 
 
 
-CREATE TRIGGER update_recuiter_updated_on
+CREATE TRIGGER update_recruiter_updated_on
     BEFORE UPDATE
     ON
-        recuiter
+        recruiter
     FOR EACH ROW
-EXECUTE PROCEDURE update_updated_on_recuiter();
+EXECUTE PROCEDURE update_updated_on_recruiter();
 
 
 
@@ -170,7 +179,7 @@ skill_id        text ,
 description 			text ,
 available   text,
 
-recuiter_id text ,
+recruiter_id text ,
 
 created_on 			timestamp default CURRENT_TIMESTAMP not null	,
 updated_on 			timestamp default CURRENT_TIMESTAMP not null	,
@@ -179,8 +188,8 @@ check 		(domicile  	in ('on-site','remote')),
 check 		(type     	in ('full-time','part-time')),
 check 		(available  	in ('on','off')),
 
-constraint skill foreign key(skill_id) references skill(id),
-constraint recuiter foreign key(recuiter_id) references recuiter(id),
+constraint skill foreign key(skill_id) references skill(id) ON DELETE CASCADE,
+constraint recruiter foreign key(recruiter_id) references recruiter(id) ON DELETE CASCADE,
 
 primary key (id)
 );
@@ -218,8 +227,8 @@ status text ,
 created_on 		timestamp default CURRENT_TIMESTAMP not null	,
 updated_on      timestamp default CURRENT_TIMESTAMP not null	,
 
-constraint job foreign key(job_id) references job(id),
-constraint users foreign key(users_id) references users(id),
+constraint job foreign key(job_id) references job(id) ON DELETE CASCADE,
+constraint users foreign key(users_id) references users(id) ON DELETE CASCADE,
 
 primary key (id)
 );

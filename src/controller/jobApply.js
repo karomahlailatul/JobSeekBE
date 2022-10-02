@@ -138,7 +138,7 @@ const jobApplyController = {
             res.send(createError(404));
         }
     },
-    getPaginationJobApply_Users_Job_Recuiter_Skill: async (req, res) => {
+    getPaginationJobApply_Users_Job_Recruiter_Skill: async (req, res) => {
         try {
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 10;
@@ -147,15 +147,15 @@ const jobApplyController = {
             let querysearch = "";
             let totalData = "";
             if (search === undefined) {
-                querysearch = `inner join job on job_apply.job_id = job.id inner join skill on job.skill_id = skill.id inner join recuiter on job.recuiter_id = recuiter.id inner join users on job_apply.users_id = users.id  `;
+                querysearch = `inner join job on job_apply.job_id = job.id inner join skill on job.skill_id = skill.id inner join recruiter on job.recruiter_id = recruiter.id inner join users on job_apply.users_id = users.id  `;
                 totalData = parseInt((await jobApplyModel.selectAll()).rowCount);
             } else {
-                querysearch = `inner join job on job_apply.job_id = job.id inner join skill on job.skill_id = skill.id inner join recuiter on job.recuiter_id = recuiter.id inner join users on job_apply.users_id = users.id   where job.name ilike '%${search}%' `;
+                querysearch = `inner join job on job_apply.job_id = job.id inner join skill on job.skill_id = skill.id inner join recruiter on job.recruiter_id = recruiter.id inner join users on job_apply.users_id = users.id   where job.name ilike '%${search}%' `;
                 totalData = parseInt((await jobApplyModel.selectAllSearch(querysearch)).rowCount);
             }
             const sortby = "job_apply." + ( req.query.sortby || "created_on" );
             const sort = req.query.sort || "desc";
-            const result = await jobApplyModel.selectPaginationJobApply_Users_Job_Recuiter_Skill({ limit, offset, sortby, sort, querysearch });
+            const result = await jobApplyModel.selectPaginationJobApply_Users_Job_Recruiter_Skill({ limit, offset, sortby, sort, querysearch });
             const totalPage = Math.ceil(totalData / limit);
             const pagination = {
                 currentPage: page,

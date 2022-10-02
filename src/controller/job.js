@@ -17,7 +17,7 @@ const jobController = {
                 querysearch = ``;
                 totalData = parseInt((await jobModel.selectAll()).rowCount);
             } else {
-                querysearch = ` inner join skill on job.skill_id = skill.id inner join recuiter on job.recuiter_id = recuiter.id where job.name ilike '%${search}%' `;
+                querysearch = ` inner join skill on job.skill_id = skill.id inner join recruiter on job.recruiter_id = recruiter.id where job.name ilike '%${search}%' `;
                 totalData = parseInt((await jobModel.selectAllSearch(querysearch)).rowCount);
             }
             const sortby = "job." + ( req.query.sortby || "created_on" );
@@ -58,25 +58,25 @@ const jobController = {
         try {
             const id = uuidv4().toLocaleLowerCase();
 
-            const { name , position , domicile , type , skill_id, description , available , recuiter_id } = req.body;
+            const { name , position , domicile , type , skill_id, description , available , recruiter_id } = req.body;
             
-            const checkRecipes = await jobModel.selectSkill(skill_id); 
+            const checkSkill = await jobModel.selectSkill(skill_id); 
 
             try {
-                if (checkRecipes.rowCount == 0) throw "Skill has not found";
+                if (checkSkill.rowCount == 0) throw "Skill has not found";
             } catch (error) {
                 return commonHelper.response(res, null, 404, error);
             }
 
-            const checkRecuiter = await jobModel.selectRecuiter(recuiter_id);
+            const checkrecruiter = await jobModel.selectrecruiter(recruiter_id);
 
             try {
-                if (checkRecuiter.rowCount == 0) throw "Recuiter has not found";
+                if (checkrecruiter.rowCount == 0) throw "Recruiter has not found";
             } catch (error) {
                 return commonHelper.response(res, null, 404, error);
             }
 
-            await jobModel.insertJob( id, name , position , domicile , type , skill_id, description , available , recuiter_id);
+            await jobModel.insertJob( id, name , position , domicile , type , skill_id, description , available , recruiter_id);
             commonHelper.response(res, null, 201, "New Job Created");
             
         } catch (error) {
@@ -87,7 +87,7 @@ const jobController = {
         try {
             const id = req.params.id;
 
-            const { name , position , domicile , type , skill_id, description , available , recuiter_id } = req.body;
+            const { name , position , domicile , type , skill_id, description , available , recruiter_id } = req.body;
 
             const checkjob = await jobModel.selectJob(id);
 
@@ -97,23 +97,23 @@ const jobController = {
                 return commonHelper.response(res, null, 404, error);
             }
             
-            const checkRecipes = await jobModel.selectSkill(skill_id);
+            const checkSkill = await jobModel.selectSkill(skill_id);
 
             try {
-                if (checkRecipes.rowCount == 0) throw "Recipes has not found";
+                if (checkSkill.rowCount == 0) throw "Skill has not found";
             } catch (error) {
                 return commonHelper.response(res, null, 404, error);
             }
 
-            const checkRecuiter = await jobModel.selectRecuiter(recuiter_id);
+            const checkrecruiter = await jobModel.selectRecruiter(recruiter_id);
             try {
-                if (checkRecuiter.rowCount == 0) throw "Users has not found";
+                if (checkrecruiter.rowCount == 0) throw "Recruiter has not found";
             } catch (error) {
                 return commonHelper.response(res, null, 404, error);
             }
 
         
-            await jobModel.updateJob(id, name , position , domicile , type , skill_id, description , available , recuiter_id);
+            await jobModel.updateJob(id, name , position , domicile , type , skill_id, description , available , recruiter_id);
             commonHelper.response(res, null, 201, "Job Updated");
         } catch (error) {
             res.send(createError(400));
@@ -137,7 +137,7 @@ const jobController = {
             res.send(createError(404));
         }
     },
-    getPaginationJob_Recuiter_Skill: async (req, res) => {
+    getPaginationJob_Recruiter_Skill: async (req, res) => {
         try {
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 16;
@@ -146,15 +146,15 @@ const jobController = {
             let querysearch = "";
             let totalData = "";
             if (search === undefined) {
-                querysearch = ` inner join skill on job.skill_id = skill.id  inner join recuiter on job.recuiter_id = recuiter.id `;
+                querysearch = ` inner join skill on job.skill_id = skill.id  inner join recruiter on job.recruiter_id = recruiter.id `;
                 totalData = parseInt((await jobModel.selectAll()).rowCount);
             } else {
-                querysearch = ` inner join skill on job.skill_id = skill.id  inner join recuiter on job.recuiter_id = recuiter.id  where job.name ilike '%${search}%' `;
+                querysearch = ` inner join skill on job.skill_id = skill.id  inner join recruiter on job.recruiter_id = recruiter.id  where job.name ilike '%${search}%' `;
                 totalData = parseInt((await jobModel.selectAllSearch(querysearch)).rowCount);
             }
             const sortby = "job." + ( req.query.sortby || "created_on" );
             const sort = req.query.sort || "desc";
-            const result = await jobModel.selectPaginationJob_Recuiter_Skill({ limit, offset, sortby, sort, querysearch });
+            const result = await jobModel.selectPaginationJob_Recruiter_Skill({ limit, offset, sortby, sort, querysearch });
             const totalPage = Math.ceil(totalData / limit);
             const pagination = {
                 currentPage: page,
@@ -167,7 +167,7 @@ const jobController = {
             res.send(createError(404));
         }
     },
-    getPaginationJob_Recuiter_Skill_ID: async (req, res) => {
+    getPaginationJob_Recruiter_Skill_ID: async (req, res) => {
       
           try {
             const id = req.params.id;

@@ -10,8 +10,9 @@ const upload = require("../middlewares/upload");
 //     validateChangePassword } = require('../middlewares/common')
 
 router
+
   .post("/register", ControllerUsers.registerAccount)
-  .post("/register-user-recuiter", ControllerUsers.registerAccountWithRecuiter)
+  .post("/register-user-recruiter", ControllerUsers.registerAccountWithRecruiter)
   .post("/login", ControllerUsers.loginAccount)
   .post("/refresh-token", ControllerUsers.refreshToken)
   .get("/profile", protect, ControllerUsers.profileAccount)
@@ -20,5 +21,8 @@ router
   .put("/profile/changeEmail", protect, ControllerUsers.changeEmail)
   .put("/profile/changePassword", protect, ControllerUsers.changePassword)
 
+  .get("/verify", ControllerUsers.VerifyAccount)
+
+  // .delete("/deletedrive", ControllerUsers.testingDeleteDrive)
 
 module.exports = router;

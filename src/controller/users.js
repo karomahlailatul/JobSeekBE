@@ -6,15 +6,16 @@ const commonHelper = require("../helper/common");
 const authHelper = require("../helper/auth");
 const createError = require("http-errors");
 
-const {
-  authenticateGoogle,
-  uploadToGoogleDrive,
-} = require("../middlewares/googleDriveService");
+const crypto = require("crypto");
+const sendEmail = require("../middlewares/sendEmail");
+
+const { authenticateGoogle, uploadToGoogleDrive, deleteFromGoogleDrive } = require("../middlewares/googleDriveService");
+
 
 const UserController = {
   registerAccount: async (req, res) => {
     try {
-      const { email, password, name, phone } = req.body;
+      const { email, password, name, phone, role } = req.body;
       const checkEmail = await usersModel.findEmail(email);
 
       try {
@@ -27,23 +28,54 @@ const UserController = {
       const passwordHash = bcrypt.hashSync(password, saltRounds);
       const id = uuidv4().toLocaleLowerCase();
 
-      const data = {
-        id,
-        email,
-        passwordHash,
-        name,
-        role: "user",
-        phone,
-      };
+      const verify = "false";
 
-      await usersModel
-        .create(data)
-        .then((result) =>
-          commonHelper.response(res, result.rows, 201, "User Created")
-        )
-        .catch((err) => res.send(err));
+      const id_users_verification = uuidv4().toLocaleLowerCase();
+      const users_id = id;
+      const token = crypto.randomBytes(32).toString("hex");
+
+      const url = `${process.env.BASE_URL}users/verify?id=${users_id}&token=${token}`;
+
+      await sendEmail(email, "Verify Email", url);
+
+      await usersModel.create(id, email, passwordHash, name, role, phone, verify);
+      await usersModel.createUsersVerification(id_users_verification, users_id, token);
+
+      commonHelper.response(res, null, 201, "Sign Up Success, Please check your email for verification");
     } catch (error) {
       res.send(createError(400));
+    }
+  },
+  VerifyAccount: async (req, res) => {
+    try {
+      const queryUsersId = req.query.id;
+      const queryToken = req.query.token;
+
+      if (typeof queryUsersId === "string" && typeof queryToken === "string") {
+        const checkUsersVerify = await usersModel.findId(queryUsersId);
+
+        if (checkUsersVerify.rowCount == 0) {
+          return commonHelper.response(res, null, 403, "Error users has not found");
+        }
+
+        if (checkUsersVerify.rows[0].verify != "false") {
+          return commonHelper.response(res, null, 403, "Users has been verified");
+        }
+
+        const result = await usersModel.checkUsersVerification(queryUsersId, queryToken);
+
+        if (result.rowCount == 0) {
+          return commonHelper.response(res, null, 403, "Error invalid credential verification");
+        } else {
+          await usersModel.updateAccountVerification(queryUsersId);
+          await usersModel.deleteUsersVerification(queryUsersId, queryToken);
+          commonHelper.response(res, null, 403, "Users verified succesful");
+        }
+      } else {
+        return commonHelper.response(res, null, 403, "Invalid url verification");
+      }
+    } catch (error) {
+      res.send(createError(404));
     }
   },
   loginAccount: async (req, res) => {
@@ -58,10 +90,14 @@ const UserController = {
       }
       const isValidPassword = bcrypt.compareSync(password, user.password);
       // console.log(isValidPassword);
-
       if (!isValidPassword) {
         return commonHelper.response(res, null, 403, "Password is invalid");
       }
+
+      if (user.verify === "false") {
+        return commonHelper.response(res, null, 403, "Account not verified, Please check your email");
+      }
+
       delete user.password;
       const payload = {
         email: user.email,
@@ -86,94 +122,38 @@ const UserController = {
       } = await usersModel.findEmail(email);
       delete user.password;
 
-      if (
-        typeof queryUpdate === "undefined" &&
-        typeof queryDelete === "undefined"
-      ) {
+      if (typeof queryUpdate === "undefined" && typeof queryDelete === "undefined") {
         commonHelper.response(res, user, 200);
-      } else if (
-        typeof queryUpdate === "string" &&
-        typeof queryDelete === "undefined"
-      ) {
-        // console.log(req.file);
+      } else if (typeof queryUpdate === "string" && typeof queryDelete === "undefined") {
         if (req.file) {
           const auth = authenticateGoogle();
+
+          // Delete From Drive
+          if (user.picture != null || user.picture != undefined) {
+            const urlParamsDrive = new URLSearchParams(user.picture);
+            const fileIdDrive = urlParamsDrive.get("id") == (null || undefined) ? urlParamsDrive.get("https://drive.google.com/thumbnail?id") : urlParamsDrive.get("id");
+
+            await deleteFromGoogleDrive(fileIdDrive, auth);
+            // console.log(fileIdDrive);
+          }
+
+          // Upload to Drive
           const response = await uploadToGoogleDrive(req.file, auth);
           const picture = `https://drive.google.com/thumbnail?id=${response.data.id}&sz=s1080`;
 
-          const {
-            name,
-            gender,
-            phone,
-            date_of_birth,
-            job_desk,
-            domicile,
-            location,
-            description,
-            role,
-          } = req.body;
+          const { name, gender, phone, date_of_birth, job_desk, domicile, location, description, role } = req.body;
 
-          // console.log(
-          //   email,
-          //   name,
-          //   gender,
-          //   phone,
-          //   date_of_birth,
-          //   picture,
-          //   job_desk,
-          //   domicile,
-          //   location,
-          //   description,
-          //   role
-          // );
-          await usersModel.updateAccount(
-            email,
-            name,
-            gender,
-            phone,
-            date_of_birth,
-            picture,
-            job_desk,
-            domicile,
-            location,
-            description,
-            role
-          );
+          await usersModel.updateAccount(email, name, gender, phone, date_of_birth, picture, job_desk, domicile, location, description, role);
 
           commonHelper.response(res, null, 201, "Profile has been updated");
         } else {
-          const {
-            name,
-            gender,
-            phone,
-            date_of_birth,
-            job_desk,
-            domicile,
-            location,
-            description,
-            role,
-          } = req.body;
+          const { name, gender, phone, date_of_birth, job_desk, domicile, location, description, role } = req.body;
 
-          await usersModel.updateNoPict(
-            email,
-            name,
-            gender,
-            phone,
-            date_of_birth,
-            job_desk,
-            domicile,
-            location,
-            description,
-            role
-          );
+          await usersModel.updateNoPict(email, name, gender, phone, date_of_birth, job_desk, domicile, location, description, role);
 
           commonHelper.response(res, null, 201, "Profile has been updated");
         }
-      } else if (
-        typeof queryUpdate === "undefined" &&
-        typeof queryDelete === "string"
-      ) {
-        console.log("siap delete");
+      } else if (typeof queryUpdate === "undefined" && typeof queryDelete === "string") {
         await usersModel.deleteAccount(email);
         commonHelper.response(res, null, 200, "Account has been deleted");
       }
@@ -181,7 +161,6 @@ const UserController = {
       res.send(createError(404));
     }
   },
-
   changeEmail: async (req, res) => {
     try {
       const email = req.payload.email;
@@ -189,31 +168,24 @@ const UserController = {
       // console.log(email + emailBody);
       // console.log(req.body.email);
       await usersModel.changeEmailAccount(email, emailBody);
-      commonHelper.response(
-        res,
-        null,
-        201,
-        "Email Account has been update, Please Login again"
-      );
+      commonHelper.response(res, null, 201, "Email Account has been update, Please Login again");
     } catch (error) {
       res.send(createError(404));
     }
   },
-
   changePassword: async (req, res) => {
     try {
       const email = req.payload.email;
       const { password } = req.body;
       const saltRounds = 10;
       const passwordNewHash = bcrypt.hashSync(password, saltRounds);
-      console.log(email + " " + password + "   " + passwordNewHash);
+      // console.log(email + " " + password + "   " + passwordNewHash);
       await usersModel.changePassword(email, passwordNewHash);
       commonHelper.response(res, null, 200, "Password Account has been update");
     } catch (error) {
       res.send(createError(404));
     }
   },
-
   refreshToken: async (req, res) => {
     const refreshToken = req.body.refreshToken;
     const decoded = jwt.verify(refreshToken, process.env.SECRETE_KEY_JWT);
@@ -227,8 +199,7 @@ const UserController = {
     };
     commonHelper.response(res, result, 200, "Refresh Token Success");
   },
-
-  registerAccountWithRecuiter: async (req, res) => {
+  registerAccountWithRecruiter: async (req, res) => {
     try {
       const { email, password, name, phone, role, position, company } = req.body;
 
@@ -244,45 +215,31 @@ const UserController = {
       const passwordHash = bcrypt.hashSync(password, saltRounds);
       const id = uuidv4().toLocaleLowerCase();
       const users_id = id;
-      const recuiter_id = id;
+      const recruiter_id = id;
 
-      await usersModel.createUserWithRecuiterOnRegister(
-        id,
-        email,
-        passwordHash,
-        name,
-        role,
-        phone
-      );
-      
-      await usersModel.createRecuiterOnRegister(
-        recuiter_id,
-        users_id,
-        position,
-        company
-      );
+      const verify = "false";
 
-      // console.log(
-      //   id,
-      //   email,
-      //   passwordHash,
-      //   name,
-      //   role,
-      //   phone
-      // );
-      
-      // console.log(
-      //   recuiter_id,
-      //   users_id,
-      //   position,
-      //   company
-      // );
+      const id_users_verification = uuidv4().toLocaleLowerCase();
+      const token = crypto.randomBytes(32).toString("hex");
 
-      commonHelper.response(res, null, 201, "New User Created");
+      const url = `${process.env.BASE_URL}users/verify?id=${users_id}&token=${token}`;
+
+      await sendEmail(email, "Verify Email", url);
+
+      await usersModel.create(id, email, passwordHash, name, role, phone, verify);
+      await usersModel.createRecruiterOnRegister(recruiter_id, users_id, position, company);
+      await usersModel.createUsersVerification(id_users_verification, users_id, token);
+
+      commonHelper.response(res, null, 201, "Sign Up Success, Please check your email for verification");
     } catch (error) {
       res.send(createError(400));
     }
   },
+  // testingDeleteDrive: async (req) => {
+  //   const auth = authenticateGoogle();
+  //   const { id_files_drive } = req.body;
+  //   await deleteFromGoogleDrive(id_files_drive, auth);
+  // },
 };
 
 module.exports = UserController;
