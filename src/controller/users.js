@@ -128,11 +128,11 @@ const UserController = {
         if (req.file) {
           const auth = authenticateGoogle();
 
-          // if (user.picture != null || user.picture != undefined) {
+          if (user.picture != null || user.picture != undefined) {
               
-          //   await deleteFromGoogleDrive(user.picture, auth);
+            await deleteFromGoogleDrive(user.picture, auth);
             
-          // }
+          }
 
           // Upload to Drive
           const response = await uploadToGoogleDrive(req.file, auth);
