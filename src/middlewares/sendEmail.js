@@ -21,7 +21,7 @@ module.exports = async (email, subject, url) => {
 			html: ` <h1>Email Confirmation</h1>
                     <h2>Hello ${email}</h2>
                     <p>Thank you for join us. Please confirm your email by clicking on the following link</p>
-                    <a href=http://${url}> Click here</a>
+                    <a href='${url}'> Click here</a>
                     </div>`
 		});
 		// console.log("email sent successfully");

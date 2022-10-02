@@ -69,7 +69,7 @@ const UserController = {
         } else {
           await usersModel.updateAccountVerification(queryUsersId);
           await usersModel.deleteUsersVerification(queryUsersId, queryToken);
-          commonHelper.response(res, null, 403, "Users verified succesful");
+          commonHelper.response(res, null, 200, "Users verified succesful");
         }
       } else {
         return commonHelper.response(res, null, 403, "Invalid url verification");
