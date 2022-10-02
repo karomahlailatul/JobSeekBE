@@ -128,14 +128,11 @@ const UserController = {
         if (req.file) {
           const auth = authenticateGoogle();
 
-          // Delete From Drive
-          if (user.picture != null || user.picture != undefined) {
-            // const urlParamsDrive = new URLSearchParams(user.picture);
-            // const fileIdDrive = urlParamsDrive.get("id") == (null || undefined) ? urlParamsDrive.get("https://drive.google.com/thumbnail?id") : urlParamsDrive.get("id");
+          // if (user.picture != null || user.picture != undefined) {
+              
+          //   await deleteFromGoogleDrive(user.picture, auth);
             
-            await deleteFromGoogleDrive(user.picture, auth);
-            // console.log(fileIdDrive);
-          }
+          // }
 
           // Upload to Drive
           const response = await uploadToGoogleDrive(req.file, auth);

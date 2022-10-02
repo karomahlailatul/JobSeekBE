@@ -43,7 +43,7 @@ const uploadToGoogleDrive = async (file, auth) => {
 };
 
 const deleteFromGoogleDrive = async (fileId, auth) => {
-        
+    
     const fileIdAfterSlice = fileId.slice(38,71);
 
     const driveService = google.drive({ version: "v3", auth });
