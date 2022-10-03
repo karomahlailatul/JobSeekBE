@@ -34,7 +34,11 @@ const UserController = {
       const users_id = id;
       const token = crypto.randomBytes(32).toString("hex");
 
-      const url = `${process.env.BASE_URL}users/verify?id=${users_id}&token=${token}`;
+      // localhost
+      // const url = `${process.env.BASE_URL}users/verify?id=${users_id}&token=${token}`;
+
+      // deployment
+      const url = `${process.env.BASE_URL}/verification?type=email&id=${users_id}&token=${token}`;
 
       await sendEmail(email, "Verify Email", url);
 
@@ -219,7 +223,12 @@ const UserController = {
       const id_users_verification = uuidv4().toLocaleLowerCase();
       const token = crypto.randomBytes(32).toString("hex");
 
-      const url = `${process.env.BASE_URL}users/verify?id=${users_id}&token=${token}`;
+      // localhost
+      // const url = `${process.env.BASE_URL}users/verify?id=${users_id}&token=${token}`;
+
+      // deployment
+      const url = `${process.env.BASE_URL}/verification?type=email&id=${users_id}&token=${token}`;
+
 
       await sendEmail(email, "Verify Email", url);
 
