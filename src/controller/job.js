@@ -68,7 +68,7 @@ const jobController = {
                 return commonHelper.response(res, null, 404, error);
             }
 
-            const checkrecruiter = await jobModel.selectrecruiter(recruiter_id);
+            const checkrecruiter = await jobModel.selectRecruiter(recruiter_id);
 
             try {
                 if (checkrecruiter.rowCount == 0) throw "Recruiter has not found";
