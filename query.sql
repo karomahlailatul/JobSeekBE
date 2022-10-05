@@ -214,11 +214,6 @@ CREATE TRIGGER update_job_updated_on
 EXECUTE PROCEDURE update_updated_on_job();
 
 
-
-
-
-
-
 create table job_apply(
 id 				text 	not null,
 job_id 			text	,
