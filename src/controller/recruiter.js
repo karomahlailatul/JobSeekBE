@@ -4,7 +4,7 @@ const createError = require("http-errors");
 const commonHelper = require("../helper/common");
 // const client = require('../config/redis')
 
-const { authenticateGoogle, uploadToGoogleDrive } = require("../middlewares/googleDriveService");
+const { authenticateGoogle, uploadToGoogleDrive, deleteFromGoogleDrive } = require("../middlewares/googleDriveService");
 
 const recruiterController = {
   getPaginationRecruiter: async (req, res) => {
@@ -25,7 +25,7 @@ const recruiterController = {
         totalData = parseInt((await recruiterModel.selectAllSearch(querysearch)).rowCount);
       }
 
-      const sortby = "recruiter." + ( req.query.sortby || "created_on" );
+      const sortby = "recruiter." + (req.query.sortby || "created_on");
       const sort = req.query.sort || "desc";
       const result = await recruiterModel.selectPagination({
         limit,
@@ -77,7 +77,7 @@ const recruiterController = {
         const response = await uploadToGoogleDrive(req.file, auth);
         const logo = `https://drive.google.com/thumbnail?id=${response.data.id}&sz=s1080`;
 
-        const { users_id , position, company , email, address, phone, description } = req.body;
+        const { users_id, position, company, email, address, phone, description } = req.body;
         const id = users_id;
         const checkUsers = await recruiterModel.selectUsers(users_id);
 
@@ -87,10 +87,8 @@ const recruiterController = {
           return commonHelper.response(res, null, 404, error);
         }
 
-      
-        await recruiterModel.insertRecruiter(id, users_id , position, company , email, address, phone, logo , description );
+        await recruiterModel.insertRecruiter(id, users_id, position, company, email, address, phone, logo, description);
         commonHelper.response(res, null, 201, "New Recruiter Created");
-        
       }
     } catch (error) {
       res.send(createError(400));
@@ -100,20 +98,33 @@ const recruiterController = {
     try {
       const id = req.params.id;
 
-      const checkrecruiter = await recruiterModel.selectRecruiter(id);
+      // const checkrecruiter = await recruiterModel.selectRecruiter(id);
 
+      const {
+        rowCount,
+        rows: [checkRecruiter],
+      } = await recruiterModel.selectRecruiter(id);
+
+      // console.log(checkRecruiter.logo)
       try {
-        if (checkrecruiter.rowCount == 0) throw "recruiter has not found";
+        if (rowCount == 0) throw "recruiter has not found";
       } catch (error) {
         return commonHelper.response(res, null, 404, error);
       }
 
       if (req.file) {
+        
         const auth = authenticateGoogle();
+
+        if (checkRecruiter.picture != null || checkRecruiter.picture != undefined) {
+          await deleteFromGoogleDrive(checkRecruiter.picture, auth);
+        }
+
+        // Upload to Drive
         const response = await uploadToGoogleDrive(req.file, auth);
         const logo = `https://drive.google.com/thumbnail?id=${response.data.id}&sz=s1080`;
 
-        const { users_id , position, company , email, address, phone, description } = req.body;
+        const { users_id, position, company, email, address, phone, description } = req.body;
 
         const checkUsers = await recruiterModel.selectUsers(users_id);
 
@@ -123,11 +134,11 @@ const recruiterController = {
           return commonHelper.response(res, null, 404, error);
         }
 
-        await recruiterModel.updaterecruiter(id, users_id , position, company , email, address, phone, logo , description);
+        await recruiterModel.updateRecruiter(id, users_id, position, company, email, address, phone, logo, description);
 
         commonHelper.response(res, null, 201, "Recruiter Update");
       } else {
-        const {users_id , position, company , email, address, phone, description} = req.body;
+        const { users_id, position, company, email, address, phone, description } = req.body;
 
         const checkUsers = await recruiterModel.selectUsers(users_id);
 
@@ -137,7 +148,7 @@ const recruiterController = {
           return commonHelper.response(res, null, 404, error);
         }
 
-        await recruiterModel.updateRecruiterNoLogo(id, users_id , position, company , email, address, phone, description);
+        await recruiterModel.updateRecruiterNoLogo(id, users_id, position, company, email, address, phone, description);
 
         commonHelper.response(res, null, 201, "Recruiter Update");
       }
@@ -164,27 +175,25 @@ const recruiterController = {
   },
   insertRecruiterOnRegister: async (req, res) => {
     try {
-        // const id = uuidv4().toLocaleLowerCase();
-        const { users_id , position, company } = req.body;
+      // const id = uuidv4().toLocaleLowerCase();
+      const { users_id, position, company } = req.body;
 
-        const id = users_id;
-       
-        const checkUsers = await recruiterModel.selectUsers(users_id);
+      const id = users_id;
 
-        try {
-          if (checkUsers.rowCount == 0) throw "Users has not found";
-        } catch (error) {
-          return commonHelper.response(res, null, 404, error);
-        }
+      const checkUsers = await recruiterModel.selectUsers(users_id);
 
-        await recruiterModel.insertRecruiterOnRegister( id, users_id , position, company );
-        commonHelper.response(res, null, 201, "New Recruiter Created");
-        
+      try {
+        if (checkUsers.rowCount == 0) throw "Users has not found";
+      } catch (error) {
+        return commonHelper.response(res, null, 404, error);
+      }
+
+      await recruiterModel.insertRecruiterOnRegister(id, users_id, position, company);
+      commonHelper.response(res, null, 201, "New Recruiter Created");
     } catch (error) {
       res.send(createError(400));
     }
   },
-
 };
 
 module.exports = recruiterController;
