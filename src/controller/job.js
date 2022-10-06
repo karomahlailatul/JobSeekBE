@@ -58,15 +58,8 @@ const jobController = {
         try {
             const id = uuidv4().toLocaleLowerCase();
 
-            const { name , position , domicile , type , skill_id, description , available , recruiter_id } = req.body;
+            const { name , position , domicile , type , description , available , recruiter_id } = req.body;
             
-            const checkSkill = await jobModel.selectSkill(skill_id); 
-
-            try {
-                if (checkSkill.rowCount == 0) throw "Skill has not found";
-            } catch (error) {
-                return commonHelper.response(res, null, 404, error);
-            }
 
             const checkrecruiter = await jobModel.selectRecruiter(recruiter_id);
 
@@ -76,7 +69,7 @@ const jobController = {
                 return commonHelper.response(res, null, 404, error);
             }
 
-            await jobModel.insertJob( id, name , position , domicile , type , skill_id, description , available , recruiter_id);
+            await jobModel.insertJob( id, name , position , domicile , type , description , available , recruiter_id);
             commonHelper.response(res, null, 201, "New Job Created");
             
         } catch (error) {
