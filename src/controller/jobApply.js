@@ -138,7 +138,7 @@ const jobApplyController = {
             res.send(createError(404));
         }
     },
-    getPaginationJobApply_Users_Job_Recruiter_Skill: async (req, res) => {
+    getPaginationJobApply_Users_Job_Recruiter: async (req, res) => {
         try {
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 10;
@@ -153,7 +153,7 @@ const jobApplyController = {
             const totalData = parseInt((await jobApplyModel.selectAllSearch(querysearch)).rowCount);
             const sortby = "job_apply." + ( req.query.sortby || "created_on" );
             const sort = req.query.sort || "desc";
-            const result = await jobApplyModel.selectPaginationJobApply_Users_Job_Recruiter_Skill({ limit, offset, sortby, sort, querysearch });
+            const result = await jobApplyModel.selectPaginationJobApply_Users_Job_Recruiter({ limit, offset, sortby, sort, querysearch });
             const totalPage = Math.ceil(totalData / limit);
             const pagination = {
                 currentPage: page,

@@ -227,6 +227,7 @@ create table job_apply(
 id 				text 	not null,
 job_id 			text	,
 users_id 			text	,
+message     text ,
 status text ,
 created_on 		timestamp default CURRENT_TIMESTAMP not null	,
 updated_on      timestamp default CURRENT_TIMESTAMP not null	,
