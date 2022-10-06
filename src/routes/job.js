@@ -11,5 +11,6 @@ router.get("/fulldatafromrecuiter/:id", jobController.getPaginationJob_Recruiter
 router.post("/", protect, jobController.insertJob);
 router.put("/:id", protect, jobController.updateJob);
 router.delete("/:id", protect, jobController.deleteJob);
+router.delete('/selected/:id', protect, jobController.deleteJobSelected);
 
 module.exports = router;

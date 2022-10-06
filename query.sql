@@ -174,8 +174,6 @@ position		 		text ,
 domicile        text ,
 type            text ,
 
-skill_id        text ,
-
 description 			text ,
 available   text,
 
@@ -188,7 +186,6 @@ check 		(domicile  	in ('on-site','remote')),
 check 		(type     	in ('full-time','part-time')),
 check 		(available  	in ('on','off')),
 
-constraint skill foreign key(skill_id) references skill(id) ON DELETE CASCADE,
 constraint recruiter foreign key(recruiter_id) references recruiter(id) ON DELETE CASCADE,
 
 primary key (id)
@@ -212,6 +209,18 @@ CREATE TRIGGER update_job_updated_on
         job
     FOR EACH ROW
 EXECUTE PROCEDURE update_updated_on_job();
+
+
+create table skill_job (
+id text not null ,
+skill_id 		text	,
+job_id 		text	,
+created_on timestamp default CURRENT_TIMESTAMP not null	,
+constraint 	skill foreign key(skill_id) 	references 	skill(id) ON DELETE CASCADE,
+constraint 	job foreign key(job_id) 	references 	job(id) ON DELETE CASCADE,
+primary key (id) 
+);
+
 
 
 create table job_apply(

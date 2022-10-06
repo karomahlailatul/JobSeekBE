@@ -17,7 +17,7 @@ const jobController = {
                 querysearch = ``;
                 totalData = parseInt((await jobModel.selectAll()).rowCount);
             } else {
-                querysearch = ` inner join skill on job.skill_id = skill.id inner join recruiter on job.recruiter_id = recruiter.id where job.name ilike '%${search}%' `;
+                querysearch = ` inner join recruiter on job.recruiter_id = recruiter.id where job.name ilike '%${search}%' `;
                 totalData = parseInt((await jobModel.selectAllSearch(querysearch)).rowCount);
             }
             const sortby = "job." + ( req.query.sortby || "created_on" );
@@ -132,11 +132,20 @@ const jobController = {
             }
 
             jobModel.deleteJob(id);
-            commonHelper.response(res, null, 200, "Job Deleted");
+            commonHelper.response(res, null, 200, "Job Deleted Success");
         } catch (error) {
             res.send(createError(404));
         }
     },
+    deleteJobSelected: async (req, res) => {
+        try {
+          const id = req.params.id;
+          await jobModel.deleteJobSelected(id);
+          commonHelper.response(res, null, 200, "Job Deleted Success");
+        } catch (error) {
+          res.send(createError(404));
+        }
+      },
     getPaginationJob_Recruiter_Skill: async (req, res) => {
         try {
             const page = parseInt(req.query.page) || 1;
@@ -146,10 +155,10 @@ const jobController = {
             let querysearch = "";
             let totalData = "";
             if (search === undefined) {
-                querysearch = ` inner join skill on job.skill_id = skill.id  inner join recruiter on job.recruiter_id = recruiter.id `;
+                querysearch = `  inner join recruiter on job.recruiter_id = recruiter.id `;
                 totalData = parseInt((await jobModel.selectAll()).rowCount);
             } else {
-                querysearch = ` inner join skill on job.skill_id = skill.id  inner join recruiter on job.recruiter_id = recruiter.id  where job.name ilike '%${search}%' `;
+                querysearch = `  inner join recruiter on job.recruiter_id = recruiter.id  where job.name ilike '%${search}%' `;
                 totalData = parseInt((await jobModel.selectAllSearch(querysearch)).rowCount);
             }
             const sortby = "job." + ( req.query.sortby || "created_on" );
@@ -199,9 +208,9 @@ const jobController = {
             let querysearch = "";
             
             if (search === undefined) {
-                querysearch = ` inner join skill on job.skill_id = skill.id  inner join recruiter on job.recruiter_id = recruiter.id where recruiter.id = '${id}' `;
+                querysearch = `  inner join recruiter on job.recruiter_id = recruiter.id where recruiter_id = '${id}' `;
              } else {
-                querysearch = ` inner join skill on job.skill_id = skill.id  inner join recruiter on job.recruiter_id = recruiter.id  where job.name ilike '%${search}%' and where recruiter.id = '${id}' `;       
+                querysearch = `  inner join recruiter on job.recruiter_id = recruiter.id  where job.name ilike '%${search}%' and recruiter_id = '${id}' `;       
             }
             const totalData = parseInt((await jobModel.selectAllSearch(querysearch)).rowCount);
             const sortby = "job." + ( req.query.sortby || "created_on" );
