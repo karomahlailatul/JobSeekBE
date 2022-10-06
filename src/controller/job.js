@@ -153,14 +153,12 @@ const jobController = {
             const offset = (page - 1) * limit;
             const search = req.query.search;
             let querysearch = "";
-            let totalData = "";
             if (search === undefined) {
                 querysearch = `  inner join recruiter on job.recruiter_id = recruiter.id `;
-                totalData = parseInt((await jobModel.selectAll()).rowCount);
             } else {
                 querysearch = `  inner join recruiter on job.recruiter_id = recruiter.id  where job.name ilike '%${search}%' `;
-                totalData = parseInt((await jobModel.selectAllSearch(querysearch)).rowCount);
             }
+            const totalData = parseInt((await jobModel.selectAllSearch(querysearch)).rowCount);
             const sortby = "job." + ( req.query.sortby || "created_on" );
             const sort = req.query.sort || "desc";
             const result = await jobModel.selectPaginationJob_Recruiter_Skill({ limit, offset, sortby, sort, querysearch });

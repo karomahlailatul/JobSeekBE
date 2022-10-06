@@ -8,6 +8,7 @@ const portfolioRouter = require("./portfolio")
 const skillUsersRouter = require("./skillUsers")
 const recruiterRouter = require("./recruiter")
 const jobRouter = require("./job")
+const skillJobRouter = require("./skillJob")
 const jobApplyRouter = require("./jobApply")
 
 router
@@ -19,6 +20,7 @@ router
     .use("/skill-users", skillUsersRouter)
     .use("/recruiter", recruiterRouter)
     .use("/job", jobRouter)
+    .use("/skill-job", skillJobRouter)
     .use("/job-apply", jobApplyRouter)
 
 module.exports = router;

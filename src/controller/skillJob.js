@@ -1,12 +1,13 @@
 const { v4: uuidv4 } = require("uuid");
-const jobApplyModel = require("../models/jobApply");
+const skillJobModel = require("../models/skillJob");
 const createError = require("http-errors");
 const commonHelper = require("../helper/common");
 // const client = require('../config/redis')
 
-const jobApplyController = {
-    getPaginationJobApply: async (req, res) => {
+const skillJobController = {
+    getPaginationskillJob: async (req, res) => {
         try {
+            // console.log("test");
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 10;
             const offset = (page - 1) * limit;
@@ -14,15 +15,15 @@ const jobApplyController = {
             let querysearch = "";
             let totalData = "";
             if (search === undefined) {
-                querysearch = ``;
-                totalData = parseInt((await jobApplyModel.selectAll()).rowCount);
+                querysearch = ` inner join job on skill_job.job_id = job.id inner join skill on skill_job.skill_id = skill.id`;
+                totalData = parseInt((await skillJobModel.selectAllSearch(querysearch)).rowCount);
             } else {
-                querysearch = ` inner join job on job_apply.job_id = job.id inner join users on job_apply.users_id = users.id where job.name ilike '%${search}%' `;
-                totalData = parseInt((await jobApplyModel.selectAllSearch(querysearch)).rowCount);
+                querysearch = ` inner join job on skill_job.job_id = job.id inner join skill on skill_job.skill_id = skill.id where job.name ilike '%${search}%' `;
+                totalData = parseInt((await skillJobModel.selectAllSearch(querysearch)).rowCount);
             }
-            const sortby = "job_apply." + ( req.query.sortby || "created_on" );
+            const sortby = "skill_job." + ( req.query.sortby || "created_on" );
             const sort = req.query.sort || "desc";
-            const result = await jobApplyModel.selectPagination({ limit, offset, sortby, sort, querysearch });
+            const result = await skillJobModel.selectPagination({ limit, offset, sortby, sort, querysearch });
             const totalPage = Math.ceil(totalData / limit);
             const pagination = {
                 currentPage: page,
@@ -35,32 +36,32 @@ const jobApplyController = {
             res.send(createError(404));
         }
     },
-    getJobApply: async (req, res) => {
+    getSkillJob: async (req, res) => {
         try {
             const id = req.params.id;
 
-            const checkjobApply = await jobApplyModel.selectJobApply(id);
+            const checkskillJob = await skillJobModel.selectSkillJob(id);
 
             try {
-                if (checkjobApply.rowCount == 0) throw "Job Apply has not found";
+                if (checkskillJob.rowCount == 0) throw "Skill Job has not found";
             } catch (error) {
                 return commonHelper.response(res, null, 404, error);
             }
 
-            const result = checkjobApply;
+            const result = checkskillJob;
             // client.setEx(`transaction/${id}`, 60 * 60, JSON.stringify(result.rows))
             commonHelper.response(res, result.rows, 200, null);
         } catch (error) {
             res.send(createError(404));
         }
     },
-    insertJobApply: async (req, res) => {
+    insertSkillJob: async (req, res) => {
         try {
             const id = uuidv4().toLocaleLowerCase();
 
-            const { job_id , users_id , status } = req.body;
+            const { job_id , skill_id } = req.body;
             
-            const checkJob = await jobApplyModel.selectJob(job_id); 
+            const checkJob = await skillJobModel.selectJob(job_id); 
 
             try {
                 if (checkJob.rowCount == 0) throw "Job has not found";
@@ -68,36 +69,36 @@ const jobApplyController = {
                 return commonHelper.response(res, null, 404, error);
             }
 
-            const checkUsers = await jobApplyModel.selectUsers(users_id);
+            const checkSkill = await skillJobModel.selectSkill(skill_id);
 
             try {
-                if (checkUsers.rowCount == 0) throw "Users has not found";
+                if (checkSkill.rowCount == 0) throw "Skill has not found";
             } catch (error) {
                 return commonHelper.response(res, null, 404, error);
             }
 
-            await jobApplyModel.insertJobApply( id, job_id , users_id , status );
-            commonHelper.response(res, null, 201, "New Job Apply Created");
+            await skillJobModel.insertSkillJob( id, job_id , skill_id );
+            commonHelper.response(res, null, 201, "New Skill Job Created");
             
         } catch (error) {
             res.send(createError(400));
         }
     },
-    updateJobApply: async (req, res) => {
+    updateSkillJob: async (req, res) => {
         try {
             const id = req.params.id;
 
-            const { job_id , users_id , status } = req.body;
+            const { job_id , skill_id } = req.body;
 
-            const checkjobApply = await jobApplyModel.selectJobApply(id);
+            const checkskillJob = await skillJobModel.selectSkillJob(id);
 
             try {
-                if (checkjobApply.rowCount == 0) throw "jobApply has not found";
+                if (checkskillJob.rowCount == 0) throw "Skill Job has not found";
             } catch (error) {
                 return commonHelper.response(res, null, 404, error);
             }
             
-            const checkJob = await jobApplyModel.selectJob(job_id); 
+            const checkJob = await skillJobModel.selectJob(job_id); 
 
             try {
                 if (checkJob.rowCount == 0) throw "Job has not found";
@@ -105,55 +106,57 @@ const jobApplyController = {
                 return commonHelper.response(res, null, 404, error);
             }
 
-            const checkUsers = await jobApplyModel.selectUsers(users_id);
+            const checkSkill = await skillJobModel.selectSkill(skill_id);
 
             try {
-                if (checkUsers.rowCount == 0) throw "Users has not found";
+                if (checkSkill.rowCount == 0) throw "Skill has not found";
             } catch (error) {
                 return commonHelper.response(res, null, 404, error);
             }
 
         
-            await jobApplyModel.updateJobApply( id, job_id , users_id , status );
+            await skillJobModel.updateSkillJob( id, job_id , skill_id  );
             commonHelper.response(res, null, 201, "Job Apply Updated");
         } catch (error) {
             res.send(createError(400));
         }
     },
-    deleteJobApply: async (req, res) => {
+    deleteSkillJob: async (req, res) => {
         try {
             const id = req.params.id;
 
-            const checkjobApply = await jobApplyModel.selectJobApply(id);
+            const checkskillJob = await skillJobModel.selectSkillJob(id);
 
             try {
-                if (checkjobApply.rowCount == 0) throw "Job Apply has not found";
+                if (checkskillJob.rowCount == 0) throw "Skill Job has not found";
             } catch (error) {
                 return commonHelper.response(res, null, 404, error);
             }
 
-            jobApplyModel.deleteJobApply(id);
-            commonHelper.response(res, null, 200, "Job Apply Deleted");
+            skillJobModel.deleteSkillJob(id);
+            commonHelper.response(res, null, 200, "Skill Job Deleted");
         } catch (error) {
             res.send(createError(404));
         }
     },
-    getPaginationJobApply_Users_Job_Recruiter_Skill: async (req, res) => {
+    getPaginationSkillJob_Job_Skill: async (req, res) => {
         try {
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 10;
             const offset = (page - 1) * limit;
             const search = req.query.search;
             let querysearch = "";
+            let totalData = "";
             if (search === undefined) {
-                querysearch = `inner join job on job_apply.job_id = job.id  inner join recruiter on job.recruiter_id = recruiter.id inner join users on job_apply.users_id = users.id  `;
-              } else {
-                querysearch = `inner join job on job_apply.job_id = job.id  inner join recruiter on job.recruiter_id = recruiter.id inner join users on job_apply.users_id = users.id   where job.name ilike '%${search}%' `;        
+                querysearch = `inner join job on skill_job.job_id = job.id inner join skill on skill_job.skill_id = skill.id   `;
+                totalData = parseInt((await skillJobModel.selectAll()).rowCount);
+            } else {
+                querysearch = `inner join job on skill_job.job_id = job.id inner join skill on skill_job.skill_id = skill.id where job.name ilike '%${search}%' `;
+                totalData = parseInt((await skillJobModel.selectAllSearch(querysearch)).rowCount);
             }
-            const totalData = parseInt((await jobApplyModel.selectAllSearch(querysearch)).rowCount);
-            const sortby = "job_apply." + ( req.query.sortby || "created_on" );
+            const sortby = "skill_job." + ( req.query.sortby || "created_on" );
             const sort = req.query.sort || "desc";
-            const result = await jobApplyModel.selectPaginationJobApply_Users_Job_Recruiter_Skill({ limit, offset, sortby, sort, querysearch });
+            const result = await skillJobModel.selectPaginationSkillJob_Job_Skill({ limit, offset, sortby, sort, querysearch });
             const totalPage = Math.ceil(totalData / limit);
             const pagination = {
                 currentPage: page,
@@ -168,4 +171,4 @@ const jobApplyController = {
     },
 };
 
-module.exports = jobApplyController;
+module.exports = skillJobController;
