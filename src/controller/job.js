@@ -189,6 +189,36 @@ const jobController = {
         }
     
     },
+    getPaginationJob_Recruiter_Skill_From_Recruiter: async (req, res) => {
+        try {
+            const id = req.params.id;
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 16;
+            const offset = (page - 1) * limit;
+            const search = req.query.search;
+            let querysearch = "";
+            
+            if (search === undefined) {
+                querysearch = ` inner join skill on job.skill_id = skill.id  inner join recruiter on job.recruiter_id = recruiter.id where recruiter.id = '${id}' `;
+             } else {
+                querysearch = ` inner join skill on job.skill_id = skill.id  inner join recruiter on job.recruiter_id = recruiter.id  where job.name ilike '%${search}%' and where recruiter.id = '${id}' `;       
+            }
+            const totalData = parseInt((await jobModel.selectAllSearch(querysearch)).rowCount);
+            const sortby = "job." + ( req.query.sortby || "created_on" );
+            const sort = req.query.sort || "desc";
+            const result = await jobModel.selectPaginationJob_Recruiter_Skill({ limit, offset, sortby, sort, querysearch });
+            const totalPage = Math.ceil(totalData / limit);
+            const pagination = {
+                currentPage: page,
+                limit: limit,
+                totalData: totalData,
+                totalPage: totalPage,
+            };
+            commonHelper.response(res, result.rows, 200, null, pagination);
+        } catch (error) {
+            res.send(createError(404));
+        }
+    },
 };
 
 module.exports = jobController;
