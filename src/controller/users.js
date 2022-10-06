@@ -142,15 +142,15 @@ const UserController = {
           const response = await uploadToGoogleDrive(req.file, auth);
           const picture = `https://drive.google.com/thumbnail?id=${response.data.id}&sz=s1080`;
 
-          const { name, gender, phone, date_of_birth, job_desk, domicile, location, description, role } = req.body;
+          const { name, gender, phone, date_of_birth, job_desk, system, location, description, role } = req.body;
 
-          await usersModel.updateAccount(email, name, gender, phone, date_of_birth, picture, job_desk, domicile, location, description, role);
+          await usersModel.updateAccount(email, name, gender, phone, date_of_birth, picture, job_desk, system, location, description, role);
 
           commonHelper.response(res, null, 201, "Profile has been updated");
         } else {
-          const { name, gender, phone, date_of_birth, job_desk, domicile, location, description, role } = req.body;
+          const { name, gender, phone, date_of_birth, job_desk, system, location, description, role } = req.body;
 
-          await usersModel.updateNoPict(email, name, gender, phone, date_of_birth, job_desk, domicile, location, description, role);
+          await usersModel.updateNoPict(email, name, gender, phone, date_of_birth, job_desk, system, location, description, role);
 
           commonHelper.response(res, null, 201, "Profile has been updated");
         }

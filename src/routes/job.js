@@ -9,6 +9,7 @@ router.get("/:id", jobController.getJob);
 router.get("/fulldata/:id", jobController.getPaginationJob_Recruiter_Skill_ID);
 router.get("/fulldatafromrecuiter/:id", jobController.getPaginationJob_Recruiter_Skill_From_Recruiter);
 router.post("/", protect, jobController.insertJob);
+router.post("/withskilljob", protect, jobController.insertJob_SkillJob);
 router.put("/:id", protect, jobController.updateJob);
 router.delete("/:id", protect, jobController.deleteJob);
 router.delete('/selected/:id', protect, jobController.deleteJobSelected);

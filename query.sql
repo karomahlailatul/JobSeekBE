@@ -171,7 +171,7 @@ create table job(
 id 				text 	not null,
 name 			  	text ,
 position		 		text ,
-domicile        text ,
+system        text ,
 type            text ,
 
 description 			text ,
@@ -182,7 +182,7 @@ recruiter_id text ,
 created_on 			timestamp default CURRENT_TIMESTAMP not null	,
 updated_on 			timestamp default CURRENT_TIMESTAMP not null	,
 
-check 		(domicile  	in ('on-site','remote')),
+check 		(system  	in ('on-site','remote')),
 check 		(type     	in ('full-time','part-time')),
 check 		(available  	in ('on','off')),
 

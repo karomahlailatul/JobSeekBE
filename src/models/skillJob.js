@@ -8,11 +8,11 @@ const selectAllSearch = (querysearch) => {
 }
 
 const selectPagination = ({ limit, offset, sortby, sort, querysearch }) => {
-    return Pool.query(`select skill_job.id , skill_job.job_id , skill_job.skill_id ,skill_job.created_on , job.name , job.position ,  job.domicile  , job.description , job.available , job.recruiter_id , job.created_on as job_created_on , job.updated_on as job_updated_on , skill.name as skill_name  from skill_job   ${querysearch}  order by ${sortby} ${sort} limit ${limit} offset ${offset} `)
+    return Pool.query(`select skill_job.id , skill_job.job_id , skill_job.skill_id ,skill_job.created_on , job.name , job.position ,  job.system  , job.description , job.available , job.recruiter_id , job.created_on as job_created_on , job.updated_on as job_updated_on , skill.name as skill_name  from skill_job   ${querysearch}  order by ${sortby} ${sort} limit ${limit} offset ${offset} `)
 }
 
 const selectPaginationSkillJob_Job_Skill = ({ limit, offset, sortby, sort, querysearch }) => {
-    return Pool.query(`select skill_job.id , skill_job.job_id , skill_job.skill_id ,skill_job.created_on , job.name , job.position ,  job.domicile , job.description , job.available , job.recruiter_id , job.created_on as job_created_on , job.updated_on as job_updated_on , skill.name as skill_name  from skill_job   ${querysearch}  order by ${sortby} ${sort} limit ${limit} offset ${offset} `)
+    return Pool.query(`select skill_job.id , skill_job.job_id , skill_job.skill_id ,skill_job.created_on , job.name , job.position ,  job.system , job.description , job.available , job.recruiter_id , job.created_on as job_created_on , job.updated_on as job_updated_on , skill.name as skill_name  from skill_job   ${querysearch}  order by ${sortby} ${sort} limit ${limit} offset ${offset} `)
 }
 
 const selectSkillJob = (id) => {
