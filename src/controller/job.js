@@ -81,6 +81,13 @@ const jobController = {
 
       const { name, position, system, type, description, available, recruiter_id, skill_list } = req.body;
 
+      try {
+        if (skill_list == "" || skill_list == null || skill_list == undefined) throw "Skill has not found";
+      } catch (error) {
+        return commonHelper.response(res, null, 404, error);
+      }
+
+
       const checkrecruiter = await jobModel.selectRecruiter(recruiter_id);
 
       try {
