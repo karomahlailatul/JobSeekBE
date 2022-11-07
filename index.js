@@ -30,7 +30,6 @@ app.all("*", (req, res, next) => {
   next(createError());
 });
 
-// console.log()
 
 app.use((err, req, res, next) => {
   const statusCode = err.status;
@@ -39,6 +38,11 @@ app.use((err, req, res, next) => {
   }
   next();
 });
+
+// configurate passport
+const passport = require("passport");
+app.use(passport.initialize());
+require("./src/middlewares/Passport.js");
 
 const port = process.env.PORT;
 app.listen(port, () => {

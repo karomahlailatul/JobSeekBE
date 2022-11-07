@@ -10,8 +10,8 @@ primary key     (id)
 create table users(
 id 			    text 	not null,
 email 			text 	not null,
-password  		text 	not null,
-username   text ,
+password  		text ,
+username        text ,
 name 			text    ,
 gender 			text 	,
 phone 			text 	,

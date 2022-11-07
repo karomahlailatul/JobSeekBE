@@ -9,6 +9,9 @@ const upload = require("../middlewares/upload");
 //     validateChangeEmail,
 //     validateChangePassword } = require('../middlewares/common')
 
+const passport = require("passport");
+const errorFrontEndUrl =  process.env.CALLBACK_ERROR_URL_FRONT_END
+
 router
 
   .post("/register", ControllerUsers.registerAccount)
@@ -24,6 +27,7 @@ router
 
   .get("/verify", ControllerUsers.VerifyAccount)
 
-  // .delete("/deletedrive", ControllerUsers.testingDeleteDrive)
+  .get('/auth/google', passport.authenticate('google', {  session: false,  scope: [ 'email', 'profile' ]}))
+  .get('/auth/google/callback',  passport.authenticate( 'google', { failureRedirect:  errorFrontEndUrl , session: false,}),ControllerUsers.googleSign  )
 
 module.exports = router;

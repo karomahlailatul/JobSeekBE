@@ -64,6 +64,11 @@ const createRecruiterOnRegister = (recruiter_id, users_id, position, company) =>
   return Pool.query(`insert into recruiter ( id, users_id , position, company )  values ( '${recruiter_id}' , '${users_id}' , '${position}', '${company}' ) `);
 };
 
+const createAccountGoogle = (uuid, username, email, picture, name, role, verify) => {
+  return Pool.query(`insert into users ( 
+    id , email , password , name , role , verify ,username ,picture) values ( '${uuid}' , '${email}' , 'GoogleSign' , '${name}' , '${role}'  ,'${verify}' , '${username}') , '${picture}'`);
+};
+
 module.exports = {
   findEmail,
   findUsername,
@@ -80,4 +85,5 @@ module.exports = {
   changePasswordAdmin,
   deleteAccount,
   createRecruiterOnRegister,
+  createAccountGoogle
 };

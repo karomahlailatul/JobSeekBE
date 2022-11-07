@@ -18,6 +18,7 @@ const UserController = {
       const checkEmail = await usersModel.findEmail(email);
 
       try {
+        delete checkEmail.rows[0].password;
         if (checkEmail.rowCount == 1) throw "Email is already used";
       } catch (error) {
         return commonHelper.response(res, null, 403, error);
@@ -38,11 +39,11 @@ const UserController = {
       // const url = `${process.env.BASE_URL}users/verify?id=${users_id}&token=${token}`;
 
       // deployment
-      const url = `${process.env.BASE_URL}/verification?type=email&id=${users_id}&token=${token}`;
+      const url = `${process.env.BASE_URL}?type=email&id=${users_id}&token=${token}`;
 
       await sendEmail(email, "Verify Email", url);
 
-      await usersModel.create(id, email, passwordHash, name, role, phone, verify ,username);
+      await usersModel.create(id, email, passwordHash, name, role, phone, verify, username);
       await usersModel.createUsersVerification(id_users_verification, users_id, token);
 
       commonHelper.response(res, null, 201, "Sign Up Success, Please check your email for verification");
@@ -129,9 +130,8 @@ const UserController = {
       if (typeof queryUpdate === "undefined" && typeof queryDelete === "undefined") {
         commonHelper.response(res, user, 200);
       } else if (typeof queryUpdate === "string" && typeof queryDelete === "undefined") {
+        const { name, gender, phone, date_of_birth, domicile, job_desk, location, description, role, username } = req.body;
 
-        const { name, gender, phone, date_of_birth, domicile, job_desk,  location, description, role , username} = req.body;
-        
         if (req.file) {
           const auth = authenticateGoogle();
 
@@ -183,8 +183,7 @@ const UserController = {
   },
   changePasswordAdmin: async (req, res) => {
     try {
-
-      console.log("test")
+      
       const role = req.payload.role;
       try {
         if (role != "admin" && role != "super-user") throw "You're Cannot Access this feature";
@@ -255,6 +254,46 @@ const UserController = {
     } catch (error) {
       res.send(createError(400));
     }
+  },
+  googleSign: async (req, res) => {
+    const { name, email, picture } = JSON.parse(req.user)._json;
+    const result = await usersModel.findEmail(email);
+
+    let uuid;
+    let role;
+
+    if (result.rowCount == 1) {
+      delete result.rows[0].password;
+      uuid = result.rows[0].id;
+      role = result.rows[0].role;
+    } else {
+      const username = name + crypto.randomBytes(16).toString("hex");
+      uuid = uuidv4().toLocaleLowerCase();
+      const verify = "true";
+      role = "user";
+      await usersModel.createAccountGoogle(uuid, username, email, picture, name, role, verify);
+    }
+
+    const payload = {
+      email: email,
+      role: role,
+    };
+
+    const token = authHelper.generateToken(payload);
+    const refreshToken = authHelper.generateRefreshToken(payload);
+
+    const data = {
+      id: uuid,
+      token: token,
+      refreshToken: refreshToken,
+      role: role,
+    };
+
+    // encodeBase64
+    let bufferDataEncode = Buffer.from(JSON.stringify(data));
+    let resultBase64DataEncode = bufferDataEncode.toString("base64");
+
+    return res.redirect(`${process.env.CALLBACK_SUCCESS_URL_FRONT_END}?success&code=${resultBase64DataEncode}`);
   },
 };
 
