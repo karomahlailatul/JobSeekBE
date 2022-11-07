@@ -4,7 +4,7 @@ const createError = require("http-errors");
 const commonHelper = require("../helper/common");
 // const client = require('../config/redis')
 
-const { authenticateGoogle, uploadToGoogleDrive } = require("../middlewares/googleDriveService");
+const { authenticateGoogle, uploadToGoogleDrive, deleteFromGoogleDrive } = require("../middlewares/googleDriveService");
 
 const portfolioController = {
   getPaginationPortfolio: async (req, res) => {
@@ -15,17 +15,15 @@ const portfolioController = {
 
       const search = req.query.search;
       let querysearch = "";
-      let totalData = "";
 
       if (search === null || search === undefined) {
         querysearch = ``;
-        totalData = parseInt((await portfolioModel.selectAll()).rowCount);
       } else {
         querysearch = `inner join users on portfolio.users_id = users.id where users.name ilike '%${search}%' `;
-        totalData = parseInt((await portfolioModel.selectAllSearch(querysearch)).rowCount);
       }
+      const totalData = parseInt((await portfolioModel.selectAllSearch(querysearch)).rowCount);
 
-      const sortby = "portfolio." + ( req.query.sortby || "created_on" );
+      const sortby = "portfolio." + (req.query.sortby || "created_on");
       const sort = req.query.sort || "desc";
       const result = await portfolioModel.selectPagination({
         limit,
@@ -78,7 +76,7 @@ const portfolioController = {
         const response = await uploadToGoogleDrive(req.file, auth);
         const photo = `https://drive.google.com/thumbnail?id=${response.data.id}&sz=s1080`;
 
-        const { name, link , type, description , users_id } = req.body;
+        const { name, link, type, description, users_id } = req.body;
 
         const checkUsers = await portfolioModel.selectUsers(users_id);
 
@@ -101,10 +99,10 @@ const portfolioController = {
     try {
       const id = req.params.id;
 
-      const checkProduct = await portfolioModel.selectPortfolio(id);
+      const checkPortofolio = await portfolioModel.selectPortfolio(id);
 
       try {
-        if (checkProduct.rowCount == 0) throw "Portfolio has not found";
+        if (checkPortofolio.rowCount == 0) throw "Portfolio has not found";
       } catch (error) {
         return commonHelper.response(res, null, 404, error);
       }
@@ -112,10 +110,15 @@ const portfolioController = {
       // console.log(req.file);
       if (req.file) {
         const auth = authenticateGoogle();
+
+        if (checkPortofolio.photo != null || checkPortofolio.photo != undefined) {
+          await deleteFromGoogleDrive(checkPortofolio.photo, auth);
+        }
+
         const response = await uploadToGoogleDrive(req.file, auth);
         const photo = `https://drive.google.com/thumbnail?id=${response.data.id}&sz=s1080`;
 
-        const {name, link , type, description , users_id } = req.body;
+        const { name, link, type, description, users_id } = req.body;
 
         const checkUsers = await portfolioModel.selectUsers(users_id);
 
@@ -129,7 +132,7 @@ const portfolioController = {
 
         commonHelper.response(res, null, 201, "Portfolio Update");
       } else {
-        const {name, link , type, description , users_id} = req.body;
+        const { name, link, type, description, users_id } = req.body;
 
         const checkUsers = await portfolioModel.selectUsers(users_id);
 
@@ -164,8 +167,6 @@ const portfolioController = {
       res.send(createError(404));
     }
   },
-
-
 };
 
 module.exports = portfolioController;

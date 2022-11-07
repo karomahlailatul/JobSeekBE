@@ -12,8 +12,8 @@ const findId = (id) => {
   return Pool.query(`select * from users where id='${id}'`);
 };
 
-const create = (id, email, passwordHash, name, role, phone, verify) => {
-  return Pool.query(`insert into users ( id , email , password , name , role , phone , verify ) values ( '${id}' , '${email}' , '${passwordHash}' , '${name}' , '${role}' , '${phone}' ,'${verify}') `);
+const create = (id, email, passwordHash, name, role, phone, verify, username) => {
+  return Pool.query(`insert into users ( id , email , password , name , role , phone , verify ,username ) values ( '${id}' , '${email}' , '${passwordHash}' , '${name}' , '${role}' , '${phone}' ,'${verify}' , '${username}') `);
 };
 
 const createUsersVerification = (id, users_id, token) => {
@@ -32,15 +32,15 @@ const updateAccountVerification = (queryUsersId) => {
   return Pool.query(`update users set verify='true' where id='${queryUsersId}' `);
 };
 
-const updateAccount = (email, name, gender, phone, date_of_birth, picture, job_desk, domicile, location, description, role) => {
+const updateAccount = (email, name, gender, phone, date_of_birth, picture, job_desk, domicile, location, description, role, username) => {
   return Pool.query(
-    `update users set name='${name}',  gender='${gender}', phone='${phone}', date_of_birth='${date_of_birth}', picture='${picture}', job_desk = '${job_desk}',  domicile = '${domicile}',  location = '${location}',  description = '${description}', role='${role}' where email='${email}'`
+    `update users set name='${name}',  username='${username}',gender='${gender}', phone='${phone}', date_of_birth='${date_of_birth}', picture='${picture}', job_desk = '${job_desk}',  domicile = '${domicile}',  location = '${location}',  description = '${description}', role='${role}' where email='${email}'`
   );
 };
 
-const updateNoPict = (email, name, gender, phone, date_of_birth, job_desk, domicile, location, description, role) => {
+const updateNoPict = (email, name, gender, phone, date_of_birth, job_desk, domicile, location, description, role, username) => {
   return Pool.query(
-    `update users set name='${name}',  gender='${gender}', phone='${phone}', date_of_birth='${date_of_birth}', job_desk = '${job_desk}',  domicile = '${domicile}',  location = '${location}',  description = '${description}', role='${role}' where email='${email}'`
+    `update users set name='${name}',  username='${username}',gender='${gender}', phone='${phone}', date_of_birth='${date_of_birth}', job_desk = '${job_desk}',  domicile = '${domicile}',  location = '${location}',  description = '${description}', role='${role}' where email='${email}'`
   );
 };
 
@@ -50,6 +50,10 @@ const changeEmailAccount = (email, emailBody) => {
 
 const changePassword = (email, passwordNewHash) => {
   return Pool.query(`update users set password='${passwordNewHash}' where email='${email}'`);
+};
+
+const changePasswordAdmin = (id, passwordNewHash) => {
+  return Pool.query(`update users set password='${passwordNewHash}' where id='${id}'`);
 };
 
 const deleteAccount = (email) => {
@@ -73,6 +77,7 @@ module.exports = {
   updateNoPict,
   changeEmailAccount,
   changePassword,
+  changePasswordAdmin,
   deleteAccount,
   createRecruiterOnRegister,
 };

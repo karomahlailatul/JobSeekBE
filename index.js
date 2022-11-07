@@ -15,7 +15,9 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(morgan("dev"));
 
-app.use(cors());
+app.use(cors({ 
+  origin: "*"
+}));
 
 app.use(helmet());
 app.use(xss());

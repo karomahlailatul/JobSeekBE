@@ -11,7 +11,6 @@ const sendEmail = require("../middlewares/sendEmail");
 
 const { authenticateGoogle, uploadToGoogleDrive, deleteFromGoogleDrive } = require("../middlewares/googleDriveService");
 
-
 const UserController = {
   registerAccount: async (req, res) => {
     try {
@@ -24,6 +23,7 @@ const UserController = {
         return commonHelper.response(res, null, 403, error);
       }
 
+      const username = name + crypto.randomBytes(16).toString("hex");
       const saltRounds = 10;
       const passwordHash = bcrypt.hashSync(password, saltRounds);
       const id = uuidv4().toLocaleLowerCase();
@@ -42,7 +42,7 @@ const UserController = {
 
       await sendEmail(email, "Verify Email", url);
 
-      await usersModel.create(id, email, passwordHash, name, role, phone, verify);
+      await usersModel.create(id, email, passwordHash, name, role, phone, verify ,username);
       await usersModel.createUsersVerification(id_users_verification, users_id, token);
 
       commonHelper.response(res, null, 201, "Sign Up Success, Please check your email for verification");
@@ -129,29 +129,23 @@ const UserController = {
       if (typeof queryUpdate === "undefined" && typeof queryDelete === "undefined") {
         commonHelper.response(res, user, 200);
       } else if (typeof queryUpdate === "string" && typeof queryDelete === "undefined") {
+
+        const { name, gender, phone, date_of_birth, domicile, job_desk,  location, description, role , username} = req.body;
+        
         if (req.file) {
           const auth = authenticateGoogle();
 
           if (user.picture != null || user.picture != undefined) {
-            
             await deleteFromGoogleDrive(user.picture, auth);
-            
           }
 
           // Upload to Drive
           const response = await uploadToGoogleDrive(req.file, auth);
           const picture = `https://drive.google.com/thumbnail?id=${response.data.id}&sz=s1080`;
-
-          const { name, gender, phone, date_of_birth, job_desk, system, location, description, role } = req.body;
-
-          await usersModel.updateAccount(email, name, gender, phone, date_of_birth, picture, job_desk, system, location, description, role);
-
+          await usersModel.updateAccount(email, name, gender, phone, date_of_birth, picture, job_desk, domicile, location, description, role, username);
           commonHelper.response(res, null, 201, "Profile has been updated");
         } else {
-          const { name, gender, phone, date_of_birth, job_desk, system, location, description, role } = req.body;
-
-          await usersModel.updateNoPict(email, name, gender, phone, date_of_birth, job_desk, system, location, description, role);
-
+          await usersModel.updateNoPict(email, name, gender, phone, date_of_birth, job_desk, domicile, location, description, role, username);
           commonHelper.response(res, null, 201, "Profile has been updated");
         }
       } else if (typeof queryUpdate === "undefined" && typeof queryDelete === "string") {
@@ -182,6 +176,28 @@ const UserController = {
       const passwordNewHash = bcrypt.hashSync(password, saltRounds);
       // console.log(email + " " + password + "   " + passwordNewHash);
       await usersModel.changePassword(email, passwordNewHash);
+      commonHelper.response(res, null, 200, "Password Account has been update");
+    } catch (error) {
+      res.send(createError(404));
+    }
+  },
+  changePasswordAdmin: async (req, res) => {
+    try {
+
+      console.log("test")
+      const role = req.payload.role;
+      try {
+        if (role != "admin" && role != "super-user") throw "You're Cannot Access this feature";
+      } catch (error) {
+        return commonHelper(res, null, 403, error);
+      }
+
+      const id = req.params.id;
+      const { password } = req.body;
+      const saltRounds = 10;
+      const passwordNewHash = bcrypt.hashSync(password, saltRounds);
+      // console.log(email + " " + password + "   " + passwordNewHash);
+      await usersModel.changePasswordAdmin(id, passwordNewHash);
       commonHelper.response(res, null, 200, "Password Account has been update");
     } catch (error) {
       res.send(createError(404));
@@ -229,7 +245,6 @@ const UserController = {
       // deployment
       const url = `${process.env.BASE_URL}/verification?type=email&id=${users_id}&token=${token}`;
 
-
       await sendEmail(email, "Verify Email", url);
 
       await usersModel.create(id, email, passwordHash, name, role, phone, verify);
@@ -241,11 +256,6 @@ const UserController = {
       res.send(createError(400));
     }
   },
-  // testingDeleteDrive: async (req) => {
-  //   const auth = authenticateGoogle();
-  //   const { id_files_drive } = req.body;
-  //   await deleteFromGoogleDrive(id_files_drive, auth);
-  // },
 };
 
 module.exports = UserController;

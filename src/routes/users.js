@@ -20,6 +20,7 @@ router
   .delete("/profile", protect, ControllerUsers.profileAccount)
   .put("/profile/changeEmail", protect, ControllerUsers.changeEmail)
   .put("/profile/changePassword", protect, ControllerUsers.changePassword)
+  .put("/profile/changePasswordAdmin/:id", protect, ControllerUsers.changePasswordAdmin)
 
   .get("/verify", ControllerUsers.VerifyAccount)
 

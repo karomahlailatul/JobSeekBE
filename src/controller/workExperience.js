@@ -12,16 +12,12 @@ const workExperienceController = {
       const offset = (page - 1) * limit;
       const search = req.query.search;
       let querysearch = "";
-      let totalData = "";
       if (search === undefined) {
         querysearch = ``;
-        totalData = parseInt((await workExperienceModel.selectAll()).rowCount);
       } else {
         querysearch = `inner join users on work_experience.users_id = users.id where users.name ilike '%${search}%' `;
-        totalData = parseInt(
-          (await workExperienceModel.selectAllSearch(querysearch)).rowCount
-        );
       }
+      const totalData = parseInt((await workExperienceModel.selectAllSearch(querysearch)).rowCount);
       const sortby = "work_experience." + (req.query.sortby || "created_on");
       const sort = req.query.sort || "desc";
       const result = await workExperienceModel.selectPagination({
@@ -47,12 +43,10 @@ const workExperienceController = {
     try {
       const id = req.params.id;
 
-      const checkworkExperience =
-        await workExperienceModel.selectWorkExperience(id);
+      const checkworkExperience = await workExperienceModel.selectWorkExperience(id);
 
       try {
-        if (checkworkExperience.rowCount == 0)
-          throw "Work Experience has not found";
+        if (checkworkExperience.rowCount == 0) throw "Work Experience has not found";
       } catch (error) {
         return commonHelper.response(res, null, 404, error);
       }
@@ -68,8 +62,7 @@ const workExperienceController = {
     try {
       const id = uuidv4().toLocaleLowerCase();
 
-      const { position, company, started, ended, description, users_id } =
-        req.body;
+      const { position, company, started, ended, description, users_id } = req.body;
       // console.log(req.body.i);
 
       const checkUsers = await workExperienceModel.selectUsers(users_id);
@@ -80,21 +73,8 @@ const workExperienceController = {
         return commonHelper.response(res, null, 404, error);
       }
 
-      await workExperienceModel.insertWorkExperience(
-        id,
-        position,
-        company,
-        started,
-        ended,
-        description,
-        users_id
-      );
-      commonHelper.response(
-        res,
-        null,
-        201,
-        "New Work Experience Recipes Created"
-      );
+      await workExperienceModel.insertWorkExperience(id, position, company, started, ended, description, users_id);
+      commonHelper.response(res, null, 201, "New Work Experience Recipes Created");
     } catch (error) {
       res.send(createError(400));
     }
@@ -103,15 +83,12 @@ const workExperienceController = {
     try {
       const id = req.params.id;
 
-      const { position, company, started, ended, description, users_id } =
-        req.body;
+      const { position, company, started, ended, description, users_id } = req.body;
 
-      const checkWorkExperience =
-        await workExperienceModel.selectWorkExperience(id);
+      const checkWorkExperience = await workExperienceModel.selectWorkExperience(id);
 
       try {
-        if (checkWorkExperience.rowCount == 0)
-          throw "Work Experience has not found";
+        if (checkWorkExperience.rowCount == 0) throw "Work Experience has not found";
       } catch (error) {
         return commonHelper.response(res, null, 404, error);
       }
@@ -123,15 +100,7 @@ const workExperienceController = {
         return commonHelper.response(res, null, 404, error);
       }
 
-      await workExperienceModel.updateWorkExperience(
-        id,
-        position,
-        company,
-        started,
-        ended,
-        description,
-        users_id
-      );
+      await workExperienceModel.updateWorkExperience(id, position, company, started, ended, description, users_id);
       commonHelper.response(res, null, 201, "Work Experience Updated");
     } catch (error) {
       res.send(createError(400));
@@ -141,12 +110,10 @@ const workExperienceController = {
     try {
       const id = req.params.id;
 
-      const checkworkExperience =
-        await workExperienceModel.selectWorkExperience(id);
+      const checkworkExperience = await workExperienceModel.selectWorkExperience(id);
 
       try {
-        if (checkworkExperience.rowCount == 0)
-          throw "Work Experience has not found";
+        if (checkworkExperience.rowCount == 0) throw "Work Experience has not found";
       } catch (error) {
         return commonHelper.response(res, null, 404, error);
       }

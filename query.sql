@@ -1,7 +1,7 @@
 create table skill (
 id              text    not null,
 name            text    ,
-created_on      timestamp default CURRENT_TIMESTAMP not null	,
+created_on      timestamptz default CURRENT_TIMESTAMP not null	,
 primary key     (id) 
 );
 
@@ -11,6 +11,7 @@ create table users(
 id 			    text 	not null,
 email 			text 	not null,
 password  		text 	not null,
+username   text ,
 name 			text    ,
 gender 			text 	,
 phone 			text 	,
@@ -174,16 +175,25 @@ position		 		text ,
 system        text ,
 type            text ,
 
+
+min_salary int,
+max_salary int,
+count_apply int,
+experience_time int ,
+
+
 description 			text ,
 available   text,
 
 recruiter_id text ,
 
+promotion_until  timestamp , 
+
 created_on 			timestamp default CURRENT_TIMESTAMP not null	,
 updated_on 			timestamp default CURRENT_TIMESTAMP not null	,
 
 check 		(system  	in ('on-site','remote')),
-check 		(type     	in ('full-time','part-time')),
+-- check 		(type     	in ('intership','full-time','full-time','freelance')),
 check 		(available  	in ('on','off')),
 
 constraint recruiter foreign key(recruiter_id) references recruiter(id) ON DELETE CASCADE,
@@ -258,3 +268,26 @@ CREATE TRIGGER update_job_apply_updated_on
 EXECUTE PROCEDURE update_updated_on_job_apply();
 
 
+
+
+
+
+insert into skill ( id, name ) values 
+('skill-1','HTML'),
+('skill-2','CSS'),
+('skill-3','JavaScript'),
+('skill-4','PHP'),
+('skill-5','NodeJs'),
+('skill-6','ExpressJs'),
+('skill-7','Git'),
+('skill-8','SQL'),
+('skill-9','MySQL'),
+('skill-10','PostgreSQL'),
+('skill-11','ReactJs'),
+('skill-12','Laravel'),
+('skill-13','NextJs'),
+('skill-14','Python'),
+('skill-15','Java'),
+('skill-16','C++'),
+('skill-17','C#'),
+('skill-18','C');

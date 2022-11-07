@@ -1,33 +1,30 @@
-const jwt = require('jsonwebtoken')
-const createError = require('http-errors')
+const jwt = require("jsonwebtoken");
+const createError = require("http-errors");
 const protect = (req, res, next) => {
   try {
-    let token
+    let token;
     if (req.headers.authorization) {
       token = req.headers.authorization.split(" ")[1];
       let decoded = jwt.verify(token, process.env.SECRETE_KEY_JWT);
-      req.payload = decoded
-      next()
+      req.payload = decoded;
+      next();
     } else {
       res.json({
-        message: "Server Need Token Auth"
-      })
+        message: "Server Need Token Auth",
+      });
     }
   } catch (error) {
     console.log(error);
-    if (error && error.name === 'JsonWebTokenError') {
-      next(new createError(400, 'Token Auth Invalid'))
-    } else if (error && error.name === 'TokenExpiredError') {
-      next(new createError(400, 'Token Auth Expired'))
+    if (error && error.name === "JsonWebTokenError") {
+      next(new createError(400, "Token Auth Invalid"));
+    } else if (error && error.name === "TokenExpiredError") {
+      next(new createError(400, "Token Auth Expired"));
     } else {
-      next(new createError(400, 'Token Auth Not Active'))
+      next(new createError(400, "Token Auth Not Active"));
     }
   }
-}
-
-
-
+};
 
 module.exports = {
-  protect
-}
+  protect,
+};

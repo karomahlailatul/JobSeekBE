@@ -15,15 +15,13 @@ const recruiterController = {
 
       const search = req.query.search;
       let querysearch = "";
-      let totalData = "";
 
       if (search === null || search === undefined) {
         querysearch = ``;
-        totalData = parseInt((await recruiterModel.selectAll()).rowCount);
       } else {
         querysearch = `inner join users on recruiter.users_id = users.id where users.name ilike '%${search}%' `;
-        totalData = parseInt((await recruiterModel.selectAllSearch(querysearch)).rowCount);
       }
+      const totalData = parseInt((await recruiterModel.selectAllSearch(querysearch)).rowCount);
 
       const sortby = "recruiter." + (req.query.sortby || "created_on");
       const sort = req.query.sort || "desc";
@@ -113,7 +111,6 @@ const recruiterController = {
       }
 
       if (req.file) {
-        
         const auth = authenticateGoogle();
 
         if (checkRecruiter.picture != null || checkRecruiter.picture != undefined) {
