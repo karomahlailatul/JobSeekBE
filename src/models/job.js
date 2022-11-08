@@ -149,11 +149,7 @@ const selectRecruiter = (recruiter_id) => {
 };
 
 const insertJob = (id, name, position, system, type, description, available, recruiter_id, min_salary, max_salary, count_apply, experience_time, promotionMaxDate) => {
-  return Pool.query(`insert into job ( 
-        id, name, position, system, type, description, available, recruiter_id, min_salary, max_salary, count_apply, experience_time, promotion_until
-        ) values (
-            '${id}', '${name}', '${position}', '${system}', '${type}', '${description}', '${available}', '${recruiter_id}', '${min_salary}', '${max_salary}', '${count_apply}', '${experience_time}', ${promotionMaxDate} 
-            )`);
+  return Pool.query(`insert into job ( id, name, position, system, type, description, available, recruiter_id, min_salary, max_salary, count_apply, experience_time, promotion_until ) values ('${id}', '${name}', '${position}', '${system}', '${type}', '${description}', '${available}', '${recruiter_id}', '${min_salary}', '${max_salary}', '${count_apply}', '${experience_time}', ${promotionMaxDate} )`);
 };
 
 const updateJob = (id, name, position, system, type, description, available, recruiter_id, min_salary, max_salary, experience_time, promotion_until) => {

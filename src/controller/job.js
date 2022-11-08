@@ -201,9 +201,10 @@ const jobController = {
       const id = uuidv4().toLocaleLowerCase();
       const job_id = id;
       const count_apply = 0;
-      const { name, position, system, type, description, available, recruiter_id, min_salary, max_salary, experience_time, skill_id, promotion_until } = req.body;
+      const { name, position, min_salary, max_salary, skill_id,experience_time, recruiter_id,system, type, available, promotion_until ,description  } = req.body;
 
-      console.log(req.skill_list)
+      // const descriptionResult = description.replace("'", "`").replace("’", "`")
+      const descriptionResult = description.replace("'", "`").replace("’", "`")
 
       let promotionMaxDate;
       if (!promotion_until == "" || !promotion_until == null || !promotion_until == undefined) {
@@ -226,7 +227,9 @@ const jobController = {
         return commonHelper.response(res, null, 404, error);
       }
 
-      await jobModel.insertJob(id, name, position, system, type, description, available, recruiter_id, min_salary, max_salary, count_apply, experience_time, promotionMaxDate);
+      // console.log(id, name, position, system, type, description, available, recruiter_id, min_salary, max_salary, count_apply, experience_time, promotionMaxDate);
+
+      await jobModel.insertJob(id, name, position, system, type, descriptionResult, available, recruiter_id, min_salary, max_salary, count_apply, experience_time, promotionMaxDate);
 
       let skillListForward;
       if (typeof skill_id == "string") {
@@ -260,8 +263,9 @@ const jobController = {
 
       const { name, position, system, type, description, available, recruiter_id, min_salary, max_salary, experience_time, skill_id, promotion_until } = req.body;
 
-      console.log(skill_id)
+      const descriptionResult = description.replace("'", "`").replace("’", "`")
       
+
       const checkjob = await jobModel.selectJob(id);
 
       try {
@@ -291,7 +295,7 @@ const jobController = {
         return commonHelper.response(res, null, 404, error);
       }
 
-      await jobModel.updateJob(id, name, position, system, type, description, available, recruiter_id, min_salary, max_salary, experience_time, promotionMaxDate);
+      await jobModel.updateJob(id, name, position, system, type, descriptionResult, available, recruiter_id, min_salary, max_salary, experience_time, promotionMaxDate);
       await jobModel.deleteSkillJobList(id);
 
       let skillListForward;
