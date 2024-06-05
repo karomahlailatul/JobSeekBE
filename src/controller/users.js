@@ -9,7 +9,11 @@ const createError = require("http-errors");
 const crypto = require("crypto");
 const sendEmail = require("../middlewares/sendEmail");
 
-const { authenticateGoogle, uploadToGoogleDrive, deleteFromGoogleDrive } = require("../middlewares/googleDriveService");
+const {
+  authenticateGoogle,
+  uploadToGoogleDrive,
+  deleteFromGoogleDrive,
+} = require("../middlewares/googleDriveService");
 
 const UserController = {
   registerAccount: async (req, res) => {
@@ -43,10 +47,28 @@ const UserController = {
 
       await sendEmail(email, "Verify Email", url);
 
-      await usersModel.create(id, email, passwordHash, name, role, phone, verify, username);
-      await usersModel.createUsersVerification(id_users_verification, users_id, token);
+      await usersModel.create(
+        id,
+        email,
+        passwordHash,
+        name,
+        role,
+        phone,
+        verify,
+        username
+      );
+      await usersModel.createUsersVerification(
+        id_users_verification,
+        users_id,
+        token
+      );
 
-      commonHelper.response(res, null, 201, "Sign Up Success, Please check your email for verification");
+      commonHelper.response(
+        res,
+        null,
+        201,
+        "Sign Up Success, Please check your email for verification"
+      );
     } catch (error) {
       res.send(createError(400));
     }
@@ -60,24 +82,47 @@ const UserController = {
         const checkUsersVerify = await usersModel.findId(queryUsersId);
 
         if (checkUsersVerify.rowCount == 0) {
-          return commonHelper.response(res, null, 403, "Error users has not found");
+          return commonHelper.response(
+            res,
+            null,
+            403,
+            "Error users has not found"
+          );
         }
 
         if (checkUsersVerify.rows[0].verify != "false") {
-          return commonHelper.response(res, null, 403, "Users has been verified");
+          return commonHelper.response(
+            res,
+            null,
+            403,
+            "Users has been verified"
+          );
         }
 
-        const result = await usersModel.checkUsersVerification(queryUsersId, queryToken);
+        const result = await usersModel.checkUsersVerification(
+          queryUsersId,
+          queryToken
+        );
 
         if (result.rowCount == 0) {
-          return commonHelper.response(res, null, 403, "Error invalid credential verification");
+          return commonHelper.response(
+            res,
+            null,
+            403,
+            "Error invalid credential verification"
+          );
         } else {
           await usersModel.updateAccountVerification(queryUsersId);
           await usersModel.deleteUsersVerification(queryUsersId, queryToken);
           commonHelper.response(res, null, 200, "Users verified succesful");
         }
       } else {
-        return commonHelper.response(res, null, 403, "Invalid url verification");
+        return commonHelper.response(
+          res,
+          null,
+          403,
+          "Invalid url verification"
+        );
       }
     } catch (error) {
       res.send(createError(404));
@@ -100,7 +145,12 @@ const UserController = {
       }
 
       if (user.verify === "false") {
-        return commonHelper.response(res, null, 403, "Account not verified, Please check your email");
+        return commonHelper.response(
+          res,
+          null,
+          403,
+          "Account not verified, Please check your email"
+        );
       }
 
       delete user.password;
@@ -127,10 +177,27 @@ const UserController = {
       } = await usersModel.findEmail(email);
       delete user.password;
 
-      if (typeof queryUpdate === "undefined" && typeof queryDelete === "undefined") {
+      if (
+        typeof queryUpdate === "undefined" &&
+        typeof queryDelete === "undefined"
+      ) {
         commonHelper.response(res, user, 200);
-      } else if (typeof queryUpdate === "string" && typeof queryDelete === "undefined") {
-        const { name, gender, phone, date_of_birth, domicile, job_desk, location, description, role, username } = req.body;
+      } else if (
+        typeof queryUpdate === "string" &&
+        typeof queryDelete === "undefined"
+      ) {
+        const {
+          name,
+          gender,
+          phone,
+          date_of_birth,
+          domicile,
+          job_desk,
+          location,
+          description,
+          role,
+          username,
+        } = req.body;
 
         if (req.file) {
           const auth = authenticateGoogle();
@@ -142,13 +209,41 @@ const UserController = {
           // Upload to Drive
           const response = await uploadToGoogleDrive(req.file, auth);
           const picture = `https://drive.google.com/thumbnail?id=${response.data.id}&sz=s1080`;
-          await usersModel.updateAccount(email, name, gender, phone, date_of_birth, picture, job_desk, domicile, location, description, role, username);
+          await usersModel.updateAccount(
+            email,
+            name,
+            gender,
+            phone,
+            date_of_birth,
+            picture,
+            job_desk,
+            domicile,
+            location,
+            description,
+            role,
+            username
+          );
           commonHelper.response(res, null, 201, "Profile has been updated");
         } else {
-          await usersModel.updateNoPict(email, name, gender, phone, date_of_birth, job_desk, domicile, location, description, role, username);
+          await usersModel.updateNoPict(
+            email,
+            name,
+            gender,
+            phone,
+            date_of_birth,
+            job_desk,
+            domicile,
+            location,
+            description,
+            role,
+            username
+          );
           commonHelper.response(res, null, 201, "Profile has been updated");
         }
-      } else if (typeof queryUpdate === "undefined" && typeof queryDelete === "string") {
+      } else if (
+        typeof queryUpdate === "undefined" &&
+        typeof queryDelete === "string"
+      ) {
         await usersModel.deleteAccount(email);
         commonHelper.response(res, null, 200, "Account has been deleted");
       }
@@ -163,7 +258,12 @@ const UserController = {
       // console.log(email + emailBody);
       // console.log(req.body.email);
       await usersModel.changeEmailAccount(email, emailBody);
-      commonHelper.response(res, null, 201, "Email Account has been update, Please Login again");
+      commonHelper.response(
+        res,
+        null,
+        201,
+        "Email Account has been update, Please Login again"
+      );
     } catch (error) {
       res.send(createError(404));
     }
@@ -183,10 +283,10 @@ const UserController = {
   },
   changePasswordAdmin: async (req, res) => {
     try {
-      
       const role = req.payload.role;
       try {
-        if (role != "admin" && role != "super-user") throw "You're Cannot Access this feature";
+        if (role != "admin" && role != "super-user")
+          throw "You're Cannot Access this feature";
       } catch (error) {
         return commonHelper(res, null, 403, error);
       }
@@ -217,7 +317,8 @@ const UserController = {
   },
   registerAccountWithRecruiter: async (req, res) => {
     try {
-      const { email, password, name, phone, role, position, company } = req.body;
+      const { email, password, name, phone, role, position, company } =
+        req.body;
 
       const checkEmail = await usersModel.findEmail(email);
 
@@ -246,11 +347,33 @@ const UserController = {
 
       await sendEmail(email, "Verify Email", url);
 
-      await usersModel.create(id, email, passwordHash, name, role, phone, verify);
-      await usersModel.createRecruiterOnRegister(recruiter_id, users_id, position, company);
-      await usersModel.createUsersVerification(id_users_verification, users_id, token);
+      await usersModel.create(
+        id,
+        email,
+        passwordHash,
+        name,
+        role,
+        phone,
+        verify
+      );
+      await usersModel.createRecruiterOnRegister(
+        recruiter_id,
+        users_id,
+        position,
+        company
+      );
+      await usersModel.createUsersVerification(
+        id_users_verification,
+        users_id,
+        token
+      );
 
-      commonHelper.response(res, null, 201, "Sign Up Success, Please check your email for verification");
+      commonHelper.response(
+        res,
+        null,
+        201,
+        "Sign Up Success, Please check your email for verification"
+      );
     } catch (error) {
       res.send(createError(400));
     }
@@ -271,7 +394,15 @@ const UserController = {
       uuid = uuidv4().toLocaleLowerCase();
       const verify = "true";
       role = "user";
-      await usersModel.createAccountGoogle(uuid, username, email, picture, name, role, verify);
+      await usersModel.createAccountGoogle(
+        uuid,
+        username,
+        email,
+        picture,
+        name,
+        role,
+        verify
+      );
     }
 
     const payload = {
@@ -293,7 +424,60 @@ const UserController = {
     let bufferDataEncode = Buffer.from(JSON.stringify(data));
     let resultBase64DataEncode = bufferDataEncode.toString("base64");
 
-    return res.redirect(`${process.env.CALLBACK_SUCCESS_URL_FRONT_END}?success&code=${resultBase64DataEncode}`);
+    return res.redirect(
+      `${process.env.CALLBACK_SUCCESS_URL_FRONT_END}?success&code=${resultBase64DataEncode}`
+    );
+  },
+  facebookSign: async (req, res) => {
+    const { name, email } = JSON.parse(req.user)._json;
+    const result = await usersModel.findEmail(email);
+
+    let uuid;
+    let role;
+    const picture = `https://graph.facebook.com/${req.user.id}/picture?type=large`;
+
+    if (result.rowCount == 1) {
+      delete result.rows[0].password;
+      uuid = result.rows[0].id;
+      role = result.rows[0].role;
+    } else {
+      const username = name + crypto.randomBytes(16).toString("hex");
+      uuid = uuidv4().toLocaleLowerCase();
+      const verify = "true";
+      role = "user";
+      await usersModel.createAccountGoogle(
+        uuid,
+        username,
+        email,
+        picture,
+        name,
+        role,
+        verify
+      );
+    }
+
+    const payload = {
+      email: email,
+      role: role,
+    };
+
+    const token = authHelper.generateToken(payload);
+    const refreshToken = authHelper.generateRefreshToken(payload);
+
+    const data = {
+      id: uuid,
+      token: token,
+      refreshToken: refreshToken,
+      role: role,
+    };
+
+    // encodeBase64
+    let bufferDataEncode = Buffer.from(JSON.stringify(data));
+    let resultBase64DataEncode = bufferDataEncode.toString("base64");
+
+    return res.redirect(
+      `${process.env.CALLBACK_SUCCESS_URL_FRONT_END}?success&code=${resultBase64DataEncode}`
+    );
   },
 };
 

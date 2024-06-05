@@ -10,7 +10,7 @@ const upload = require("../middlewares/upload");
 //     validateChangePassword } = require('../middlewares/common')
 
 const passport = require("passport");
-const errorFrontEndUrl =  process.env.CALLBACK_ERROR_URL_FRONT_END
+const errorFrontEndUrl = process.env.CALLBACK_ERROR_URL_FRONT_END
 
 router
 
@@ -27,7 +27,9 @@ router
 
   .get("/verify", ControllerUsers.VerifyAccount)
 
-  .get('/auth/google', passport.authenticate('google', {  session: false,  scope: [ 'email', 'profile' ]}))
-  .get('/auth/google/callback',  passport.authenticate( 'google', { failureRedirect:  errorFrontEndUrl , session: false,}),ControllerUsers.googleSign  )
+  .get('/auth/google', passport.authenticate('google', { session: false, scope: ['email', 'profile'] }))
+  .get('/auth/google/callback', passport.authenticate('google', { failureRedirect: errorFrontEndUrl, session: false, }), ControllerUsers.googleSign)
+  .get('/auth/facebook', passport.authenticate('facebook')) // { session: false, scope: ['email', 'profile'] }))
+  .get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: errorFrontEndUrl, }), ControllerUsers.facebookSign)
 
 module.exports = router;

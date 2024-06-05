@@ -66,7 +66,7 @@ const createRecruiterOnRegister = (recruiter_id, users_id, position, company) =>
 
 const createAccountGoogle = (uuid, username, email, picture, name, role, verify) => {
   return Pool.query(`insert into users ( 
-    id , email , password , name , role , verify ,username ,picture) values ( '${uuid}' , '${email}' , 'GoogleSign' , '${name}' , '${role}'  ,'${verify}' , '${username}') , '${picture}'`);
+    id , email , password , name , role , verify ,username ,picture) values ( '${uuid}' , '${email}' , 'FacebookSign' , '${name}' , '${role}'  ,'${verify}' , '${username}') , '${picture}'`);
 };
 
 module.exports = {
